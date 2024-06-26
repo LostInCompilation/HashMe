@@ -2,10 +2,10 @@
 
 ![Version](https://img.shields.io/badge/Version-V0.1-brightgreen?style=flat&&logo=framework) ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20-blue?style=flat&&logo=buffer) ![CPU](https://img.shields.io/badge/CPU-x86%20%7C%20ARMv8-red?style=flat&&logo=qmk) ![CPP](https://img.shields.io/badge/Language-C++20-orange?style=flat&&logo=C%2b%2b)
 
-<h3 align="center">Hardware acceleration for:</h3>
+<h3 align="center">Hardware acceleration for</h3>
 <p align="center" width="100%">
-<img src="/logo/intel_logo.svg" alt="Intel logo"/>
-<img src="/logo/arm_logo.svg" alt="ARM logo"/>
+<img src="/img/intel_logo.svg" alt="Intel logo"/>
+<img src="/img/arm_logo.svg" alt="ARM logo"/>
 </p>
 
 ## Contents

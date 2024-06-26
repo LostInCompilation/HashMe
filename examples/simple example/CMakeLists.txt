@@ -1,48 +1,33 @@
 cmake_minimum_required(VERSION 3.29)
 
-# Print build type
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-
 # TODO: Check if needed for macOS
 #set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum OS X deployment version")
 
 ###########################################################
-# Set options for sub projects
-set(CMAKE_POLICY_DEFAULT_CMP0077 NEW) # Needed to set options of subprojects inside parent project
-
-###########################################################
 # Use C++20
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED true)
-set(CMAKE_CXX_EXTENSIONS false) # Don't use GNU++
+#set(CMAKE_CXX_STANDARD 20)
+#set(CMAKE_CXX_STANDARD_REQUIRED true)
+#set(CMAKE_CXX_EXTENSIONS false)
 
 ###########################################################
 # Our project
-project("HashMe"
-	VERSION 0.1.0
-	DESCRIPTION "Modern and hardware accelerated hash library for C++"
+project("HashMe-SimpleExample"
+	VERSION 1.0.0
+	DESCRIPTION "HashMe library simple example"
 	LANGUAGES CXX
 )
 
-# Main library
-add_library("${PROJECT_NAME}"
-	include/HashMe.hpp
-	src/HashMe.cpp
+# Main executable
+add_executable("${PROJECT_NAME}"
+	SimpleExample.cpp
 )
 
-# The projects include directories
-target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-
 ###########################################################
-# Project versioning
-configure_file(HashMeVersion.hpp.cmake "${CMAKE_CURRENT_SOURCE_DIR}/include/HashMeVersion.hpp")
-
-###########################################################
-# Examples
-add_subdirectory("examples/simple example")
+# Use HashMe lib
+target_link_libraries("${PROJECT_NAME}" PRIVATE HashMe)
+target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_SOURCE_DIR}/include")
 
 #############################################################
-# Optimization
 target_compile_options("${PROJECT_NAME}" PRIVATE "-O3")
 
 ###########################################################
