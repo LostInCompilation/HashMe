@@ -5,7 +5,7 @@
 <h3 align="center">Hardware acceleration for:</h3>
 <p align="center" width="100%">
 <img src="/logo/intel_logo.svg" alt="Intel logo"/>
-![arm_logo](https://github.com/LostInCompilation/HashMe/blob/main/logo/arm_logo.svg)
+<img src="/logo/arm_logo.svg" alt="ARM logo"/>
 </p>
 
 ## Contents
