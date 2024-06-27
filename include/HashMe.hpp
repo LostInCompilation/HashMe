@@ -34,14 +34,52 @@ the following restrictions:
 #ifndef HashMe_hpp
 #define HashMe_hpp
 
-namespace HM {
-class HashMe
+// Lib includes
+#include "HasherBase.hpp"
+
+// Lib settings
+#define HM_ENABLE_NAMESPACE_ALIAS // Enable the "HM" namespace alias additionally to "HashMe"
+
+namespace HashMe
+{
+
+// Supported hash algorithms. Use dummy structs
+struct MD5;
+struct SHA256;
+
+// ***************************************************
+// Forward declaration for hasher class
+template <typename HashAlgorithm>
+class Hasher;
+
+// ***************************************************
+// Hasher class for MD5
+template <>
+class Hasher<MD5> : public HasherBase
 {
 private:
     
 public:
-    HashMe() = default;
+    Hasher() = default;
+    
+    virtual void foo() override;
 };
+
+// ***************************************************
+// Hasher class for SHA256
+template <>
+class Hasher<SHA256> : public HasherBase
+{
+private:
+    
+public:
+    Hasher() = default;
 };
+}
+
+#ifdef HM_ENABLE_NAMESPACE_ALIAS
+// Namespace alias
+namespace HM = HashMe;
+#endif
 
 #endif /* HashMe_hpp */

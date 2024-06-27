@@ -32,3 +32,10 @@ the following restrictions:
 /*------------------------------------------------------------------*/
 
 #include "HashMe.hpp"
+
+using namespace HashMe;
+
+void Hasher<MD5>::foo()
+{
+    
+}

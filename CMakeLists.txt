@@ -27,6 +27,8 @@ project("HashMe"
 # Main library
 add_library("${PROJECT_NAME}"
 	include/HashMe.hpp
+	include/HasherBase.hpp
+	
 	src/HashMe.cpp
 )
 

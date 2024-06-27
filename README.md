@@ -26,17 +26,21 @@
 ## Description
 Currently WIP!
 
+Symbols: ❌ ⚠️ ✅
+
 A simple to use, modern and free C++20 Hash library which supports **hardware accelerated** (SIMD intrinsics) algorithms for **x86 and ARMv8 (like AppleSilicon)**. The static library provides very easy integration in your projects and ultra high speeds for the most common hash algorithms like MD5, SHA1, SHA2, SHA256, SHA512 and many more.
 CMake build environment is supported, as well as generating projects for VisualStudio or Xcode.
 
+STREAMING FOR LARGE FILES
+
 ### Supported hash algorithms
 The following hash algorithms are supported:
-Algorithm | Supported | x86 Hardware accelerated |
+Algorithm | Supported | Hardware acceleration |
 | -- | --------- | --------- |
-| MD5 | ✅ Yes | ❌ ⚠️ |
+| MD5 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
 
 ### Additional features
-TODO - BASE64?
+TODO - BASE64
 
 ## Getting the library
 To download the library simply clone the repository:
@@ -45,7 +49,7 @@ git clone https://github.com/LostInCompilation/HashMe
 ~~~
 
 ## Compiling
-Compilation of the library and examples can be done using CMake and make, or projects for VisualStudio and Xcode can be generated. Small Shell scripts are included for compiling and generating projects.
+Compilation of the library and examples can be done using CMake and make. Additionally projects for VisualStudio and Xcode can be generated. Small Shell scripts for compiling and generating projects are included.
 
 ### CMake
 TODO
@@ -67,6 +71,10 @@ LINKING
 If you prefer, directly use the namespace for the library:
 ```cpp
 using namespace HashMe;
+```
+A shorter namespace alias ```HM```is also available:
+```cpp
+using namespace HM;
 ```
 
 TODO

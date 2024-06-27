@@ -27,24 +27,29 @@ the following restrictions:
 /*                      (C) 2024 Marc Schöndorf                     */
 /*                            See license                           */
 /*                                                                  */
-/*  SimpleExample.cpp                                               */
+/*  HasherBase.hpp                                                  */
 /*  Created: 26.06.2024                                             */
 /*------------------------------------------------------------------*/
 
-#include <iostream>
+#ifndef HasherBase_hpp
+#define HasherBase_hpp
 
-#include "HashMe.hpp"
-
-using namespace HashMe;
-
-int main()
+namespace HashMe
 {
-    Hasher<MD5> hasher;
-    //Hasher<int> hasher2;
+
+// ***************************************************
+// Hasher base class
+class HasherBase
+{
+private:
     
-    hasher.foo();
+protected:
+    HasherBase() = default;
     
-    std::cout << "Test" << std::endl;
-    
-    return 0;
+public:
+    virtual void foo() = 0;
+};
+
 }
+
+#endif /* HasherBase_hpp */
