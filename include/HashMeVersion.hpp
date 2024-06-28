@@ -9,5 +9,5 @@ const int32_t HM_VERSION_PATCH = 0;
 const std::string HM_VERSION_STRING = "v0.1.0";
 
 const std::string HM_APP_CMAKE_NAME = "HashMe";
-const std::string HM_APP_CMAKE_DESCRIPTION = "Modern and hardware accelerated hash library for C++";
+const std::string HM_APP_CMAKE_DESCRIPTION = "Modern, hardware accelerated hash library for C++";
 };

@@ -34,51 +34,56 @@ the following restrictions:
 #ifndef HashMe_hpp
 #define HashMe_hpp
 
-// Lib includes
-#include "HasherBase.hpp"
+// ***************************************************
+// System includes
+#include <cstdint>
+#include <array>
+#include <vector>
+#include <format>
 
+// ***************************************************
+// Lib includes
+#include "PlatformConfig.hpp"
+#include "HashMeVersion.hpp"
+
+#include "HasherBase.hpp"
+#include "SHA256.hpp"
+#include "SHA256_Hardware.hpp"
+//#include "MD5.hpp"
+
+// ***************************************************
 // Lib settings
 #define HM_ENABLE_NAMESPACE_ALIAS // Enable the "HM" namespace alias additionally to "HashMe"
 
 namespace HashMe
 {
 
-// Supported hash algorithms. Use dummy structs
-struct MD5;
-struct SHA256;
+// ***************************************************
+// Dummy types for template
+struct SOFTWARE;
 
 // ***************************************************
 // Forward declaration for hasher class
-template <typename HashAlgorithm>
+template <typename HashAlgorithm, typename HardwareSoftwareImplementation = SOFTWARE>
 class Hasher;
 
 // ***************************************************
-// Hasher class for MD5
-template <>
-class Hasher<MD5> : public HasherBase
-{
-private:
-    
-public:
-    Hasher() = default;
-    
-    virtual void foo() override;
-};
+// Version info
+int32_t GetVersionMajor();
+int32_t GetVersionMinor();
+int32_t GetVersionPatch();
+std::string GetVersionString();
+
+std::string GetDescription();
 
 // ***************************************************
-// Hasher class for SHA256
-template <>
-class Hasher<SHA256> : public HasherBase
-{
-private:
-    
-public:
-    Hasher() = default;
-};
+// Helper function to convert the hash to a string of hex values
+std::string HashToHexString(const std::vector<uint8_t>& hash);
+
 }
 
-#ifdef HM_ENABLE_NAMESPACE_ALIAS
 // Namespace alias
+#ifdef HM_ENABLE_NAMESPACE_ALIAS
 namespace HM = HashMe;
 #endif
 

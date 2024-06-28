@@ -27,45 +27,59 @@ the following restrictions:
 /*                      (C) 2024 Marc Schöndorf                     */
 /*                            See license                           */
 /*                                                                  */
-/*  HashMe.cpp                                                      */
+/*  SHA256.hpp                                                      */
 /*  Created: 26.06.2024                                             */
 /*------------------------------------------------------------------*/
 
-#include "HashMe.hpp"
+#ifndef SHA256_hpp
+#define SHA256_hpp
 
-using namespace HashMe;
-
-int32_t HashMe::GetVersionMajor()
+namespace HashMe
 {
-    return HM_VERSION_MAJOR;
-}
 
-int32_t HashMe::GetVersionMinor()
-{
-    return HM_VERSION_MINOR;
-}
+// Dummy types for template
+struct SOFTWARE;
+struct SHA256;
 
-int32_t HashMe::GetVersionPatch()
-{
-    return HM_VERSION_PATCH;
-}
+// ***************************************************
+// Forward declaration for hasher class
+template <typename HashAlgorithm, typename HardwareSoftwareImplementation>
+class Hasher;
 
-std::string HashMe::GetVersionString()
+// ***************************************************
+// Hasher class for SHA256 using software implementation
+template <>
+class Hasher<SHA256, SOFTWARE> : public HasherBase
 {
-    return HM_VERSION_STRING;
-}
-
-std::string HashMe::GetDescription()
-{
-    return HM_APP_CMAKE_DESCRIPTION;
-}
-
-std::string HashMe::HashToHexString(const std::vector<uint8_t>& hash)
-{
-    std::string result = "";
+private:
+    static const uint32_t SHA256_BLOCK_LENGTH = 64; // TODO: check if used everywhere
     
-    for(auto i : hash)
-        result.append(std::format("{:x}", i));
+    struct Context
+    {
+        uint32_t    state[8];
+        
+        uint8_t     bufferSize = 0;
+        uint64_t    numOfBits = 0;
+        uint8_t     buffer[SHA256_BLOCK_LENGTH];
+    };
     
-    return result;
+    // Our context
+    Context     m_Context;
+
+    void Transform(const uint8_t* const data);
+    
+public:
+    Hasher() = default;
+    
+    virtual void Initialize() override;
+    
+    virtual void Update(const uint8_t* const data, const uint64_t size) override;
+    virtual void Update(const std::vector<uint8_t>& data) override;
+    virtual void Update(const std::string& str) override;
+    
+    virtual std::vector<uint8_t> End() override;
+};
+
 }
+
+#endif /* SHA256_hpp */

@@ -20,16 +20,22 @@ set(CMAKE_CXX_EXTENSIONS false) # Don't use GNU++
 # Our project
 project("HashMe"
 	VERSION 0.1.0
-	DESCRIPTION "Modern and hardware accelerated hash library for C++"
+	DESCRIPTION "Modern, hardware accelerated hash library for C++"
 	LANGUAGES CXX
 )
 
 # Main library
 add_library("${PROJECT_NAME}"
+	include/picobench.h
+	include/PlatformConfig.hpp
 	include/HashMe.hpp
 	include/HasherBase.hpp
-	
+	include/SHA256.hpp
+	include/SHA256_Hardware.hpp
+	include/MD5.hpp
 	src/HashMe.cpp
+	src/SHA256.cpp
+	src/SHA256_Hardware.cpp
 )
 
 # The projects include directories

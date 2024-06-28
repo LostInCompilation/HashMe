@@ -27,45 +27,12 @@ the following restrictions:
 /*                      (C) 2024 Marc Schöndorf                     */
 /*                            See license                           */
 /*                                                                  */
-/*  HashMe.cpp                                                      */
-/*  Created: 26.06.2024                                             */
+/*  PlatformConfig.hpp                                              */
+/*  Created: 28.06.2024                                             */
 /*------------------------------------------------------------------*/
 
-#include "HashMe.hpp"
+#ifndef PlatformConfig_hpp
+#define PlatformConfig_hpp
 
-using namespace HashMe;
 
-int32_t HashMe::GetVersionMajor()
-{
-    return HM_VERSION_MAJOR;
-}
-
-int32_t HashMe::GetVersionMinor()
-{
-    return HM_VERSION_MINOR;
-}
-
-int32_t HashMe::GetVersionPatch()
-{
-    return HM_VERSION_PATCH;
-}
-
-std::string HashMe::GetVersionString()
-{
-    return HM_VERSION_STRING;
-}
-
-std::string HashMe::GetDescription()
-{
-    return HM_APP_CMAKE_DESCRIPTION;
-}
-
-std::string HashMe::HashToHexString(const std::vector<uint8_t>& hash)
-{
-    std::string result = "";
-    
-    for(auto i : hash)
-        result.append(std::format("{:x}", i));
-    
-    return result;
-}
+#endif /* PlatformConfig_hpp */

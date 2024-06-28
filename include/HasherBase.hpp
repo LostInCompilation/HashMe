@@ -38,16 +38,20 @@ namespace HashMe
 {
 
 // ***************************************************
-// Hasher base class
+// Abstract hasher base class
 class HasherBase
 {
-private:
-    
 protected:
     HasherBase() = default;
     
 public:
-    virtual void foo() = 0;
+    virtual void Initialize() = 0;
+    
+    virtual void Update(const uint8_t* const data, const uint64_t size) = 0;
+    virtual void Update(const std::vector<uint8_t>& data) = 0;
+    virtual void Update(const std::string& str) = 0;
+    
+    virtual std::vector<uint8_t> End() = 0;
 };
 
 }
