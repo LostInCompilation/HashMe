@@ -53,7 +53,7 @@ class Hasher<MD5, SOFTWARE> : public HasherBase
 {
 private:
     // Constants
-    static const uint32_t MD5_BLOCK_LENGTH = 64; // TODO: check if used everywhere
+    static const uint8_t MD5_BLOCK_LENGTH = 64; // TODO: check if used everywhere
     
     struct Context
     {
@@ -71,7 +71,7 @@ private:
     
     void Encode(uint8_t* const output, const uint32_t* const input, const uint32_t size);
     void Decode(uint32_t* const output, const uint8_t* const input, const uint32_t size);
-    void Transform(uint8_t block[MD5_BLOCK_LENGTH]);
+    void Transform(const uint8_t block[MD5_BLOCK_LENGTH]);
     
 public:
     Hasher();

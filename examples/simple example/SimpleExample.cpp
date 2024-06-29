@@ -93,7 +93,7 @@ void SHA256_Software(picobench::state& s)
     const double speed = static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
     std::cout << "Speed (Software): " << std::fixed << speed << " MB/s" << std::endl << std::endl;
 }
-//PICOBENCH(SHA256_Software).baseline();
+PICOBENCH(SHA256_Software).baseline();
 
 // ***************************************************
 // SHA256 hardware implementation
@@ -121,7 +121,7 @@ void SHA256_Hardware(picobench::state& s)
     const double speed = static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
     std::cout << "Speed (Hardware): " << std::fixed << speed << " MB/s" << std::endl << std::endl;
 }
-//PICOBENCH(SHA256_Hardware);
+PICOBENCH(SHA256_Hardware);
 
 // ***************************************************
 // MD5 software implementation
@@ -135,8 +135,8 @@ void MD5_Software(picobench::state& s)
         s.start_timer();
         
         hasher.Reset();
-        //hasher.Update(*bigData);
-        hasher.Update(testString);
+        hasher.Update(*bigData);
+        //hasher.Update(testString);
         hashResult = hasher.End();
         
         s.stop_timer();
@@ -146,8 +146,8 @@ void MD5_Software(picobench::state& s)
     std::cout << "MD5 (Software): " << HashToHexString(hashResult) << std::endl;
     
     // Print speed
-    //const double speed = static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
-    //std::cout << "Speed (Software): " << std::fixed << speed << " MB/s" << std::endl << std::endl;
+    const double speed = static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
+    std::cout << "Speed (Software): " << std::fixed << speed << " MB/s" << std::endl << std::endl;
 }
 PICOBENCH(MD5_Software);
 
@@ -223,13 +223,6 @@ int main()
     const auto report = runner.generate_report();
     report.to_text(std::cout);
     //report.to_text_concise(std::cout); // No iterations breakdown
-    
-    // ***************************************************
-    // Use software implementation
-    //SHA256_Software();
-    
-    // Use hardware implementation
-    //SHA256_Hardware();
     
     delete bigData;
     

@@ -66,7 +66,7 @@ constexpr uint32_t S44 = 21;
 
 // Basic MD5 functions
 constexpr inline uint32_t F(const uint32_t x, const uint32_t y, const uint32_t z) { return (x & y) | (~x & z); }
-constexpr inline uint32_t G(const uint32_t x, const uint32_t y, const uint32_t z) { return (x & z) | (y & z); }
+constexpr inline uint32_t G(const uint32_t x, const uint32_t y, const uint32_t z) { return (x & z) | (y & ~z); }
 constexpr inline uint32_t H(const uint32_t x, const uint32_t y, const uint32_t z) { return (x ^ y ^ z); }
 constexpr inline uint32_t I(const uint32_t x, const uint32_t y, const uint32_t z) { return y ^ (x | ~z); }
 
@@ -109,7 +109,11 @@ Hasher<MD5, SOFTWARE>::~Hasher()
 
 Hasher<MD5, SOFTWARE>::Hasher(const Hasher& other)
 {
-    // TODO: impl
+    m_Context = new Context;
+    
+    std::copy(other.m_Context->count, other.m_Context->count + 2, m_Context->count);
+    std::copy(other.m_Context->state, other.m_Context->state + 4, m_Context->state);
+    std::copy(other.m_Context->buffer, other.m_Context->buffer + MD5_BLOCK_LENGTH, m_Context->buffer);
 }
 
 void Hasher<MD5, SOFTWARE>::Initialize()
@@ -146,12 +150,10 @@ void Hasher<MD5, SOFTWARE>::Decode(uint32_t* const output, const uint8_t* const 
     uint32_t j = 0;
     
     for(; j < size; i++, j += 4)
-    {
         output[i] = input[j] | (input[j + 1] << 8) | (input[j + 2] << 16) | (input[j + 3] << 24);
-    }
 }
 
-void Hasher<MD5, SOFTWARE>::Transform(uint8_t block[MD5_BLOCK_LENGTH])
+void Hasher<MD5, SOFTWARE>::Transform(const uint8_t block[MD5_BLOCK_LENGTH])
 {
     uint32_t x[16];
     uint32_t a = m_Context->state[0];
@@ -252,8 +254,8 @@ void Hasher<MD5, SOFTWARE>::Update(const uint8_t* const data, const uint64_t siz
         throw std::invalid_argument("Data size cannot be zero.");
     
     uint64_t i;
-    uint32_t index = (m_Context->count[0] >> 3) & 0x3F;
-    const uint32_t partSize = 64 - index;
+    uint32_t index = (m_Context->count[0] >> 3) & (MD5_BLOCK_LENGTH - 1); // mod MD5_BLOCK_LENGTH
+    const uint32_t partSize = MD5_BLOCK_LENGTH - index;
     
     if ((m_Context->count[0] += (size << 3)) < (size << 3))
         m_Context->count[1]++;
@@ -267,8 +269,8 @@ void Hasher<MD5, SOFTWARE>::Update(const uint8_t* const data, const uint64_t siz
         
         Transform(m_Context->buffer);
         
-        for(i = partSize; i + MD5_BLOCK_LENGTH <= size; i += 64)
-            Transform(m_Context->buffer);
+        for(i = partSize; i + MD5_BLOCK_LENGTH <= size; i += MD5_BLOCK_LENGTH)
+            Transform(&data[i]);
         
         index = 0;
     }
