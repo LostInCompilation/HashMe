@@ -3,3 +3,4 @@
 # CMake build directory
 build/
 projects/
+cppcheck/

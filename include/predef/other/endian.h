@@ -13,7 +13,7 @@ http://www.boost.org/LICENSE_1_0.txt)
 #include <predef/library/c/gnu.h>
 #include <predef/os/macos.h>
 #include <predef/os/bsd.h>
-#include <predef/platform/android.h>
+//#include <predef/platform/android.h>
 
 /* tag::reference[]
 = `HASH_PREDEF_ENDIAN_*`

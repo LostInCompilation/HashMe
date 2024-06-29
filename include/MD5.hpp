@@ -68,9 +68,6 @@ private:
     
     // Methods
     virtual void Initialize() override;
-    
-    void Encode(uint8_t* const output, const uint32_t* const input, const uint32_t size);
-    void Decode(uint32_t* const output, const uint8_t* const input, const uint32_t size);
     void Transform(const uint8_t block[MD5_BLOCK_LENGTH]);
     
 public:

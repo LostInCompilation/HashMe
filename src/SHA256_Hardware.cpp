@@ -128,17 +128,17 @@ void Hasher<SHA256, HARDWARE>::ProcessARM(const uint8_t* preparedData, uint64_t 
         EFGH_SAVE = STATE1;
 
         // Load data
-        MSG0 = vld1q_u32((const uint32_t *)(preparedData +  0));
-        MSG1 = vld1q_u32((const uint32_t *)(preparedData + 16));
-        MSG2 = vld1q_u32((const uint32_t *)(preparedData + 32));
-        MSG3 = vld1q_u32((const uint32_t *)(preparedData + 48));
+        MSG0 = vld1q_u32(reinterpret_cast<const uint32_t*>(preparedData +  0));
+        MSG1 = vld1q_u32(reinterpret_cast<const uint32_t*>(preparedData + 16));
+        MSG2 = vld1q_u32(reinterpret_cast<const uint32_t*>(preparedData + 32));
+        MSG3 = vld1q_u32(reinterpret_cast<const uint32_t*>(preparedData + 48));
 
-        // TODO: impl endianness
-        // Reverse data for host little endian, since SHA needs big endian
+#ifdef HM_LITTLE_ENDIAN // Reverse byte order if host is little endian to match SHA256 big endian
         MSG0 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG0)));
         MSG1 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG1)));
         MSG2 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG2)));
         MSG3 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG3)));
+#endif
 
         TMP0 = vaddq_u32(MSG0, vld1q_u32(&K[0x00]));
 
@@ -305,39 +305,18 @@ void Hasher<SHA256, HARDWARE>::Update(const std::string& str)
 std::vector<uint8_t> Hasher<SHA256, HARDWARE>::End()
 {
     std::vector<uint8_t> hash(32); // 256 bit hash
- 
-#ifdef HM_LITTLE_ENDIAN
-    // Transform SHA big endian to host little endian
-    #ifdef HASH_PREDEF_COMP_MSVC_AVAILABLE // MSVC compiler
-        uint8_t* pointerIndex;
-        for(uint8_t i = 0; i < 8; i++)
-        {
-            m_State[i] = _byteswap_ulong(m_State[i]);
-            pointerIndex = reinterpret_cast<uint8_t*>(&m_State[i]);
-            
-            hash[i * 4] = *pointerIndex++;
-            hash[i * 4 + 1] = *pointerIndex++;
-            hash[i * 4 + 2] = *pointerIndex++;
-            hash[i * 4 + 3] = *pointerIndex;
-        }
-    #else
-        uint8_t* pointerIndex;
-        for(uint8_t i = 0; i < 8; i++)
-        {
-            m_State[i] = __builtin_bswap32(m_State[i]);
-            pointerIndex = reinterpret_cast<uint8_t*>(&m_State[i]);
-            
-            hash[i * 4] = *pointerIndex++;
-            hash[i * 4 + 1] = *pointerIndex++;
-            hash[i * 4 + 2] = *pointerIndex++;
-            hash[i * 4 + 3] = *pointerIndex;
-        }
-    #endif
-#else
-    // No byte swap needed, host is big endian. Just copy hash data
     uint8_t* pointerIndex;
+    
     for(uint8_t i = 0; i < 8; i++)
     {
+#ifdef HM_LITTLE_ENDIAN // Swap byte order if host is little endian
+    #ifdef HASH_PREDEF_COMP_MSVC_AVAILABLE // MSVC compiler
+        m_State[i] = _byteswap_ulong(m_State[i]);
+    #else
+        m_State[i] = __builtin_bswap32(m_State[i]);
+    #endif
+#endif /* HM_LITTLE_ENDIAN */
+        
         pointerIndex = reinterpret_cast<uint8_t*>(&m_State[i]);
         
         hash[i * 4] = *pointerIndex++;
@@ -345,7 +324,6 @@ std::vector<uint8_t> Hasher<SHA256, HARDWARE>::End()
         hash[i * 4 + 2] = *pointerIndex++;
         hash[i * 4 + 3] = *pointerIndex;
     }
-#endif
     
     return hash;
 }

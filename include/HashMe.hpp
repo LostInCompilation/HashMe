@@ -43,12 +43,13 @@ the following restrictions:
 
 // ***************************************************
 // predef library
-#include <predef.h>
+#include "predef.h"
 
 // ***************************************************
 // Lib includes
 #include "PlatformConfig.hpp"
 #include "HashMeVersion.hpp"
+#include "Utils.hpp"
 #include "HasherBase.hpp"
 #include "SHA256.hpp"
 #include "SHA256_Hardware.hpp"

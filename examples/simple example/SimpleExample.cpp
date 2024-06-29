@@ -47,11 +47,15 @@ using namespace HashMe;
 
 // ***************************************************
 // Test data
-const uint64_t bigDataSize = 200 * 1024 * 1024; // 50MB
+const uint64_t bigDataSize = 300 * 1024 * 1024; // 300MB
 std::vector<uint8_t>* bigData = nullptr; // Allocate on heap to prevent "Compiler out of heap space error" in VisualStudio
 
 const std::string testString = "123";
+const std::string longTestString = "12345678901234567890123456789012345678901234567890123456789012345"; // 65 chars
+
+// Hash results for checking
 const std::string testStringHashSHA256 = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
+const std::string testStringHashMD5 = "202cb962ac59075b964b07152d234b70";
 
 // ***************************************************
 // Startup text
@@ -72,7 +76,6 @@ void SHA256_Software(picobench::state& s)
 {
     std::vector<uint8_t> hashResult;
     Hasher<SHA256, SOFTWARE> hasher;
-    Hasher<SHA256, SOFTWARE> h1 = hasher;
     
     for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
     {
@@ -81,6 +84,7 @@ void SHA256_Software(picobench::state& s)
         hasher.Reset();
         hasher.Update(*bigData);
         //hasher.Update(testString);
+        //hasher.Update(longTestString);
         hashResult = hasher.End();
         
         s.stop_timer();
@@ -109,6 +113,7 @@ void SHA256_Hardware(picobench::state& s)
         hasher.Reset();
         hasher.Update(*bigData);
         //hasher.Update(testString);
+        //hasher.Update(longTestString);
         hashResult = hasher.End();
         
         s.stop_timer();
@@ -137,6 +142,7 @@ void MD5_Software(picobench::state& s)
         hasher.Reset();
         hasher.Update(*bigData);
         //hasher.Update(testString);
+        //hasher.Update(longTestString);
         hashResult = hasher.End();
         
         s.stop_timer();
@@ -205,6 +211,7 @@ int main()
     std::cout << "x86 SIMD detected. Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_HW_SIMD_X86) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_HW_SIMD_X86) << std::endl;
 #endif
     
+    // Print startup header
     PrintStartupHeader();
     
     // Fill big data with random values

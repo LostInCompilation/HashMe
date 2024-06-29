@@ -5,9 +5,9 @@ cmake_minimum_required(VERSION 3.29)
 
 ###########################################################
 # Use C++20
-#set(CMAKE_CXX_STANDARD 20)
-#set(CMAKE_CXX_STANDARD_REQUIRED true)
-#set(CMAKE_CXX_EXTENSIONS false)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED true)
+set(CMAKE_CXX_EXTENSIONS false)
 
 ###########################################################
 # Our project
@@ -26,10 +26,16 @@ add_executable("${PROJECT_NAME}"
 # Use HashMe lib
 target_link_libraries("${PROJECT_NAME}" PRIVATE HashMe)
 target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_SOURCE_DIR}/include")
-target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_SOURCE_DIR}/predef")
+#target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_SOURCE_DIR}/predef")
 
 #############################################################
-target_compile_options("${PROJECT_NAME}" PRIVATE "-O3")
+if (WIN32)
+	if (MSVC)
+		target_compile_options("${PROJECT_NAME}" PRIVATE "/O2")
+	endif()
+else()
+	target_compile_options("${PROJECT_NAME}" PRIVATE "-O3")
+endif()
 
 ###########################################################
 # Add as many warnings as possible
@@ -37,8 +43,8 @@ if (WIN32)
 	if (MSVC)
 		target_compile_options("${PROJECT_NAME}" PRIVATE "/W3")
 		target_compile_options("${PROJECT_NAME}" PRIVATE "/WX")
-		target_compile_options("${PROJECT_NAME}" PRIVATE "/wd4244")
-		target_compile_options("${PROJECT_NAME}" PRIVATE "/wd4267")
+		#target_compile_options("${PROJECT_NAME}" PRIVATE "/wd4244")
+		#target_compile_options("${PROJECT_NAME}" PRIVATE "/wd4267")
 		target_compile_options("${PROJECT_NAME}" PRIVATE "/D_CRT_SECURE_NO_WARNINGS")
 	endif()
 	# Force Win32 to UNICODE

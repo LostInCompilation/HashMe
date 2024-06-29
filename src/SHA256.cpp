@@ -100,60 +100,6 @@ void Hasher<SHA256, SOFTWARE>::Reset()
     std::memset(m_Context->buffer, 0, SHA256_BLOCK_LENGTH);
 }
 
-// Old transform function
-/*void Hasher<SHA256, SOFTWARE>::Transform(const uint8_t* const data)
-{
-    uint32_t block[SHA256_BLOCK_LENGTH];
-    
-    // Copy 1-byte data to 4-byte array, convert to big endianness
-    uint8_t x = 0;
-    for(uint8_t i = 0; i < 16; i++)
-    {
-        block[i] = (data[x] << 24) | (data[x + 1] << 16) | (data[x + 2] << 8) | (data[x + 3]);
-        x += 4;
-    }
-    
-    for(uint8_t i = 16; i < 64; i++)
-    {
-        block[i] = Sigma1(block[i - 2]) + block[i - 7] + Sigma0(block[i - 15]) + block[i - 16];
-    }
-    
-    // Initial values
-    uint32_t a = m_Context->state[0];
-    uint32_t b = m_Context->state[1];
-    uint32_t c = m_Context->state[2];
-    uint32_t d = m_Context->state[3];
-    uint32_t e = m_Context->state[4];
-    uint32_t f = m_Context->state[5];
-    uint32_t g = m_Context->state[6];
-    uint32_t h = m_Context->state[7];
-    uint32_t t1;
-    uint32_t t2;
-    
-    for(uint8_t i = 0; i < 64; i++)
-    {
-        t1 = h + Epsilon1(e) + Choose(e, f, g) + K[i] + block[i];
-        t2 = Epsilon0(a) + Majority(a, b, c);
-        h = g;
-        g = f;
-        f = e;
-        e = d + t1;
-        d = c;
-        c = b;
-        b = a;
-        a = t1 + t2;
-    }
-    
-    m_Context->state[0] += a;
-    m_Context->state[1] += b;
-    m_Context->state[2] += c;
-    m_Context->state[3] += d;
-    m_Context->state[4] += e;
-    m_Context->state[5] += f;
-    m_Context->state[6] += g;
-    m_Context->state[7] += h;
-}*/
-
 // Optimized transform function
 void Hasher<SHA256, SOFTWARE>::Transform(const uint8_t* const data)
 {
@@ -175,8 +121,13 @@ void Hasher<SHA256, SOFTWARE>::Transform(const uint8_t* const data)
     uint8_t i = 0;
     for(; i < 16; i++)
     {
-        // Copy 1-byte data to 4-byte array, convert to big endianness
-        block[i] = (data[x] << 24) | (data[x + 1] << 16) | (data[x + 2] << 8) | (data[x + 3]);
+        // Copy 1-byte data to 4-byte array
+#ifdef HM_LITTLE_ENDIAN
+        block[i] = Utils::U8toU32(&data[x], true); // Convert to big endian
+#else
+        block[i] = Utils::U8toU32(&data[x], false);
+#endif
+        
         x += 4;
         
         t1 = h + Epsilon1(e) + Choose(e, f, g) + K[i] + block[i];
@@ -222,10 +173,10 @@ void Hasher<SHA256, SOFTWARE>::Transform(const uint8_t* const data)
     m_Context->state[7] += h;
     
     // Cleanup sensitive data for security
-    a = b = c = d = e = f = g = h = t1 = t2 = 0;
+    //a = b = c = d = e = f = g = h = t1 = t2 = 0;
 }
 
-// TODO: optimize
+// Optimized update function
 void Hasher<SHA256, SOFTWARE>::Update(const uint8_t* const data, const uint64_t size)
 {
     if(!data)
@@ -234,18 +185,33 @@ void Hasher<SHA256, SOFTWARE>::Update(const uint8_t* const data, const uint64_t 
     if(size == 0)
         throw std::invalid_argument("Data size cannot be zero.");
     
-    // Fill buffer with 64 bytes
-    for(uint64_t i = 0; i < size; i++)
+    // Copy data size to use it as our counter
+    const uint64_t lastBlockSize = size & (SHA256_BLOCK_LENGTH - 1); // size % SHA256_BLOCK_LENGTH
+    uint64_t dataIndex = 0;
+    
+    // Fill buffer with SHA256_BLOCK_LENGTH bytes
+    while(dataIndex < size)
     {
-        m_Context->buffer[m_Context->bufferSize] = data[i];
-        m_Context->bufferSize++;
-        
-        if(m_Context->bufferSize == SHA256_BLOCK_LENGTH)
+        if((size - dataIndex) >= SHA256_BLOCK_LENGTH)
         {
+            // Copy one whole block and transform it
+            std::copy(data + dataIndex, data + dataIndex + SHA256_BLOCK_LENGTH, m_Context->buffer);
+            m_Context->bufferSize += SHA256_BLOCK_LENGTH;
+            
             Transform(m_Context->buffer);
             
             m_Context->bufferSize = 0;
             m_Context->numOfBits += 512;
+            
+            dataIndex += SHA256_BLOCK_LENGTH;
+        }
+        else
+        {
+            // Copy partial (last) block to buffer, transform it inside the End() method
+            std::copy(data + dataIndex, data + dataIndex + lastBlockSize, m_Context->buffer);
+            m_Context->bufferSize += lastBlockSize;
+            
+            dataIndex += lastBlockSize; // End loop
         }
     }
 }
@@ -265,25 +231,19 @@ std::vector<uint8_t> Hasher<SHA256, SOFTWARE>::End()
     uint8_t bufferSize = m_Context->bufferSize;
     
     // Pad last block
-    if(m_Context->bufferSize < 56)
+    if(bufferSize < 56)
     {
-        m_Context->buffer[bufferSize] = 0x80;
-        bufferSize++;
-        
-        for(; bufferSize < 56; bufferSize++)
-            m_Context->buffer[bufferSize] = 0x00;
+        m_Context->buffer[bufferSize++] = 0x80;
+        std::memset(&m_Context->buffer[bufferSize], 0x00, 56 - bufferSize);
     }
     else
     {
-        m_Context->buffer[bufferSize] = 0x80;
-        bufferSize++;
-        
-        for(; bufferSize < 64; bufferSize++)
-            m_Context->buffer[bufferSize] = 0x00;
+        m_Context->buffer[bufferSize++] = 0x80;
+        std::memset(&m_Context->buffer[bufferSize], 0x00, 64 - bufferSize);
         
         Transform(m_Context->buffer);
         
-        std::memset(m_Context->buffer, 0, 56);
+        std::memset(m_Context->buffer, 0x00, 56);
     }
     
     // Append message length in bits
@@ -303,18 +263,13 @@ std::vector<uint8_t> Hasher<SHA256, SOFTWARE>::End()
     Transform(m_Context->buffer);
     
     std::vector<uint8_t> hash(32); // 256 bit hash
-    
-    // Transform SHA big endian to host little endian
-    for(uint8_t i = 0; i < 4; i++)
+    for(uint8_t i = 0; i < 8; i++)
     {
-        hash[i]      = (m_Context->state[0] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 4]  = (m_Context->state[1] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 8]  = (m_Context->state[2] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 12] = (m_Context->state[3] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 16] = (m_Context->state[4] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 20] = (m_Context->state[5] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 24] = (m_Context->state[6] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 28] = (m_Context->state[7] >> (24 - i * 8)) & 0x000000ff;
+#ifdef HM_LITTLE_ENDIAN
+        Utils::U32toU8(m_Context->state[i], true, &hash[i * 4]); // Transform SHA big endian to host little endian
+#else
+        Utils::U32toU8(m_Context->state[i], false, &hash[i * 4]);
+#endif
     }
     
     return hash;

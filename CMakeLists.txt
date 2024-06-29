@@ -27,13 +27,16 @@ project("HashMe"
 # Main library
 add_library("${PROJECT_NAME}"
 	include/picobench.h
+	include/predef.h
 	include/PlatformConfig.hpp
 	include/HashMe.hpp
+	include/Utils.hpp
 	include/HasherBase.hpp
 	include/SHA256.hpp
 	include/SHA256_Hardware.hpp
 	include/MD5.hpp
 	src/HashMe.cpp
+	src/Utils.cpp
 	src/SHA256.cpp
 	src/SHA256_Hardware.cpp
 	src/MD5.cpp
@@ -41,7 +44,7 @@ add_library("${PROJECT_NAME}"
 
 # The projects include directories
 target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/predef")
+#target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/predef")
 
 ###########################################################
 # Project versioning
@@ -55,8 +58,7 @@ add_subdirectory("examples/simple example")
 # Optimization
 if (WIN32)
 	if (MSVC)
-		message(FATAL_ERROR "Implement optimization switch for MSVC!")
-		#target_compile_options("${PROJECT_NAME}" PRIVATE "/O2")
+		target_compile_options("${PROJECT_NAME}" PRIVATE "/O2")
 	endif()
 else()
 	target_compile_options("${PROJECT_NAME}" PRIVATE "-O3")
@@ -68,8 +70,8 @@ if (WIN32)
 	if (MSVC)
 		target_compile_options("${PROJECT_NAME}" PRIVATE "/W3")
 		target_compile_options("${PROJECT_NAME}" PRIVATE "/WX")
-		target_compile_options("${PROJECT_NAME}" PRIVATE "/wd4244")
-		target_compile_options("${PROJECT_NAME}" PRIVATE "/wd4267")
+		#target_compile_options("${PROJECT_NAME}" PRIVATE "/wd4244")
+		#target_compile_options("${PROJECT_NAME}" PRIVATE "/wd4267")
 		target_compile_options("${PROJECT_NAME}" PRIVATE "/D_CRT_SECURE_NO_WARNINGS")
 	endif()
 	# Force Win32 to UNICODE

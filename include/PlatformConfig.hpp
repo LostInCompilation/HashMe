@@ -35,6 +35,12 @@ the following restrictions:
 #define PlatformConfig_hpp
 
 // ***************************************************
+// Compiler
+#if !defined(HASH_PREDEF_COMP_MSVC_AVAILABLE) && !defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) && !defined(HASH_PREDEF_COMP_GNUC_AVAIABLE)
+#error Currently only GCC, CLANG and MSVC compilers are tested. You can compile with a different compiler by commenting out this error.
+#endif
+
+// ***************************************************
 // Endianness
 #ifdef HASH_PREDEF_ENDIAN_BIG_BYTE_AVAILABLE
     #define HM_BIG_ENDIAN
@@ -56,6 +62,8 @@ the following restrictions:
     #elif HASH_PREDEF_HW_SIMD_X86_AMD
         #error Implement SIMD for x86 AMD
     #endif
+#else
+#warning Hardware acceleration (SIMD) is not available on this platform. Did you forget a compiler switch?
 #endif
 
 #endif /* PlatformConfig_hpp */

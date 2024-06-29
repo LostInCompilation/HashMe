@@ -130,29 +130,6 @@ void Hasher<MD5, SOFTWARE>::Reset()
     m_Context->count[1] = 0;
 }
 
-void Hasher<MD5, SOFTWARE>::Encode(uint8_t* const output, const uint32_t* const input, const uint32_t size)
-{
-    uint32_t i = 0;
-    uint32_t j = 0;
-    
-    for(; j < size; i++, j += 4)
-    {
-        output[j] = static_cast<uint8_t>(input[i] & 0xFF);
-        output[j + 1] = static_cast<uint8_t>((input[i] >> 8) & 0xFF);
-        output[j + 2] = static_cast<uint8_t>((input[i] >> 16) & 0xFF);
-        output[j + 3] = static_cast<uint8_t>((input[i] >> 24) & 0xFF);
-    }
-}
-
-void Hasher<MD5, SOFTWARE>::Decode(uint32_t* const output, const uint8_t* const input, const uint32_t size)
-{
-    uint32_t i = 0;
-    uint32_t j = 0;
-    
-    for(; j < size; i++, j += 4)
-        output[i] = input[j] | (input[j + 1] << 8) | (input[j + 2] << 16) | (input[j + 3] << 24);
-}
-
 void Hasher<MD5, SOFTWARE>::Transform(const uint8_t block[MD5_BLOCK_LENGTH])
 {
     uint32_t x[16];
@@ -161,7 +138,8 @@ void Hasher<MD5, SOFTWARE>::Transform(const uint8_t block[MD5_BLOCK_LENGTH])
     uint32_t c = m_Context->state[2];
     uint32_t d = m_Context->state[3];
     
-    Decode(x, block, MD5_BLOCK_LENGTH);
+    for(uint32_t i = 0; i < (MD5_BLOCK_LENGTH >> 2); i++)
+        x[i] = Utils::U8toU32(&block[(i << 2)], false);
     
     /* Round 1 */
     FF (a, b, c, d, x[ 0], S11, 0xd76aa478); /* 1 */
@@ -297,7 +275,8 @@ std::vector<uint8_t> Hasher<MD5, SOFTWARE>::End()
 {
     // Number of bits
     uint8_t numOfBits[8];
-    Encode (numOfBits, m_Context->count, 8);
+    Utils::U32toU8(m_Context->count[0], false, &numOfBits[0]);
+    Utils::U32toU8(m_Context->count[1], false, &numOfBits[4]);
     
     // Pad out to 56 mod 64
     uint32_t index = (m_Context->count[0] >> 3) & 0x3F;
@@ -310,7 +289,9 @@ std::vector<uint8_t> Hasher<MD5, SOFTWARE>::End()
     
     // Get hash from state
     std::vector<uint8_t> hash(16); // 128 bit hash
-    Encode(hash.data(), m_Context->state, 16);
+    
+    for(uint8_t i = 0; i < 4; i++)
+        Utils::U32toU8(m_Context->state[i], false, &hash.data()[(i << 2)]);
     
     // Cleanup sensitive data for security
     std::memset(m_Context, 0, sizeof(Context));
