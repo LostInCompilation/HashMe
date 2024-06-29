@@ -52,7 +52,13 @@ the following restrictions:
 #include "HasherBase.hpp"
 #include "SHA256.hpp"
 #include "SHA256_Hardware.hpp"
-//#include "MD5.hpp"
+#include "MD5.hpp"
+
+// ***************************************************
+// Platform specific includes for SIMD
+#ifdef HM_SIMD_ARM
+#include <arm_neon.h>
+#endif
 
 // ***************************************************
 // Lib settings

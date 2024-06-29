@@ -52,13 +52,44 @@ template <>
 class Hasher<MD5, SOFTWARE> : public HasherBase
 {
 private:
+    // Constants
+    static const uint32_t MD5_BLOCK_LENGTH = 64; // TODO: check if used everywhere
+    
+    struct Context
+    {
+        uint32_t    state[4] = {0}; // ABCD
+        uint8_t     buffer[MD5_BLOCK_LENGTH] = {0};
+        
+        uint32_t    count[2] = {0};
+    };
+    
+    // Our context
+    Context*     m_Context = nullptr;
+    
+    // Methods
+    virtual void Initialize() override;
+    
+    void Encode(uint8_t* const output, const uint32_t* const input, const uint32_t size);
+    void Decode(uint32_t* const output, const uint8_t* const input, const uint32_t size);
+    void Transform(uint8_t block[MD5_BLOCK_LENGTH]);
     
 public:
-    Hasher() = default;
+    Hasher();
+    ~Hasher();
     
-    virtual void Initialize() override;
-    virtual void Update() override;
-    virtual void End() override;
+    // Allow copy but no assign
+    Hasher(const Hasher& other);
+    Hasher& operator=(const Hasher& other) = delete;
+    const Hasher& operator=(const Hasher& other) const = delete;
+    
+    // Methods
+    virtual void Reset() override;
+    
+    virtual void Update(const uint8_t* const data, const uint64_t size) override;
+    virtual void Update(const std::vector<uint8_t>& data) override;
+    virtual void Update(const std::string& str) override;
+    
+    virtual std::vector<uint8_t> End() override;
 };
 
 }

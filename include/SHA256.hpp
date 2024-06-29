@@ -53,15 +53,15 @@ class Hasher<SHA256, SOFTWARE> : public HasherBase
 {
 private:
     // Constants
-    static const uint32_t SHA256_BLOCK_LENGTH = 64; // TODO: check if used everywhere
+    static constexpr uint32_t SHA256_BLOCK_LENGTH = 64; // TODO: check if used everywhere
     
     struct Context
     {
-        uint32_t    state[8] = {};
+        uint32_t    state[8] = {0};
         
         uint8_t     bufferSize = 0;
         uint64_t    numOfBits = 0;
-        uint8_t     buffer[SHA256_BLOCK_LENGTH] = {};
+        uint8_t     buffer[SHA256_BLOCK_LENGTH] = {0};
     };
     
     // Our context

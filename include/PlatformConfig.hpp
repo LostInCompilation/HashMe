@@ -37,17 +37,25 @@ the following restrictions:
 // ***************************************************
 // Endianness
 #ifdef HASH_PREDEF_ENDIAN_BIG_BYTE_AVAILABLE
-#define HM_BIG_ENDIAN
+    #define HM_BIG_ENDIAN
 #elif defined(HASH_PREDEF_ENDIAN_LITTLE_BYTE_AVAILABLE)
-#define HM_LITTLE_ENDIAN
+    #define HM_LITTLE_ENDIAN
 #elif define(HASH_PREDEF_ENDIAN_BIG_WORD_AVAILABLE) || defined(HASH_PREDEF_ENDIAN_LITTLE_WORD_AVAILABLE)
-#error Middle endian is not supported.
+    #error Middle endian is not supported.
 #endif
 
-
+// ***************************************************
 // SIMD
-
-// ARM
-#include <arm_neon.h>
+#ifdef HASH_PREDEF_HW_SIMD_AVAILABLE
+    #if HASH_PREDEF_HW_SIMD_ARM
+        #if (HASH_PREDEF_HW_SIMD_ARM >= HASH_PREDEF_HW_SIMD_ARM_NEON_VERSION) // ARM NEON available (ARMv8)
+            #define HM_SIMD_ARM
+        #endif
+    #elif HASH_PREDEF_HW_SIMD_X86
+        #error Implement SIMD for x86
+    #elif HASH_PREDEF_HW_SIMD_X86_AMD
+        #error Implement SIMD for x86 AMD
+    #endif
+#endif
 
 #endif /* PlatformConfig_hpp */

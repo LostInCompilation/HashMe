@@ -53,7 +53,14 @@ add_subdirectory("examples/simple example")
 
 #############################################################
 # Optimization
-target_compile_options("${PROJECT_NAME}" PRIVATE "-O3")
+if (WIN32)
+	if (MSVC)
+		message(FATAL_ERROR "Implement optimization switch for MSVC!")
+		#target_compile_options("${PROJECT_NAME}" PRIVATE "/O2")
+	endif()
+else()
+	target_compile_options("${PROJECT_NAME}" PRIVATE "-O3")
+endif()
 
 ###########################################################
 # Add as many warnings as possible

@@ -33,10 +33,12 @@ the following restrictions:
 
 #include "HashMe.hpp"
 
+#ifdef HM_SIMD_ARM
+
 using namespace HashMe;
 
 // Constants
-const std::array<uint32_t, 64> K = {
+constexpr std::array<uint32_t, 64> K = {
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
     0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -47,7 +49,7 @@ const std::array<uint32_t, 64> K = {
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-const std::array<uint32_t, 8> INITIAL_HASH_VALUES = {
+constexpr std::array<uint32_t, 8> INITIAL_HASH_VALUES = {
     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
     0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
 };
@@ -73,6 +75,7 @@ void Hasher<SHA256, HARDWARE>::Reset()
     Initialize();
 }
 
+// TODO: optimize mem allocs
 uint64_t Hasher<SHA256, HARDWARE>::PrepareData(const uint8_t* const data, const uint64_t size, uint8_t** const preparedData)
 {
     const uint64_t dataSizeInBits = size << 3; // size * 8
@@ -81,8 +84,7 @@ uint64_t Hasher<SHA256, HARDWARE>::PrepareData(const uint8_t* const data, const 
     const uint64_t zeroPaddingArraySize = 1 + paddingDiv8 + 8;
     
     // Add a 1 at beginning and append n zero bits
-    uint8_t* const zeroPadding = new uint8_t[zeroPaddingArraySize];
-    std::memset(zeroPadding, 0, zeroPaddingArraySize);
+    uint8_t* const zeroPadding = new uint8_t[zeroPaddingArraySize]{0}; // Zero fill
     zeroPadding[0] = 0x80;
     
     // Append data size (uint64_t as big endian) to the end of zeroPadding array
@@ -131,6 +133,7 @@ void Hasher<SHA256, HARDWARE>::ProcessARM(const uint8_t* preparedData, uint64_t 
         MSG2 = vld1q_u32((const uint32_t *)(preparedData + 32));
         MSG3 = vld1q_u32((const uint32_t *)(preparedData + 48));
 
+        // TODO: impl endianness
         // Reverse data for host little endian, since SHA needs big endian
         MSG0 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG0)));
         MSG1 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG1)));
@@ -303,18 +306,48 @@ std::vector<uint8_t> Hasher<SHA256, HARDWARE>::End()
 {
     std::vector<uint8_t> hash(32); // 256 bit hash
  
+#ifdef HM_LITTLE_ENDIAN
     // Transform SHA big endian to host little endian
-    for(uint8_t i = 0; i < 4; i++)
+    #ifdef HASH_PREDEF_COMP_MSVC_AVAILABLE // MSVC compiler
+        uint8_t* pointerIndex;
+        for(uint8_t i = 0; i < 8; i++)
+        {
+            m_State[i] = _byteswap_ulong(m_State[i]);
+            pointerIndex = reinterpret_cast<uint8_t*>(&m_State[i]);
+            
+            hash[i * 4] = *pointerIndex++;
+            hash[i * 4 + 1] = *pointerIndex++;
+            hash[i * 4 + 2] = *pointerIndex++;
+            hash[i * 4 + 3] = *pointerIndex;
+        }
+    #else
+        uint8_t* pointerIndex;
+        for(uint8_t i = 0; i < 8; i++)
+        {
+            m_State[i] = __builtin_bswap32(m_State[i]);
+            pointerIndex = reinterpret_cast<uint8_t*>(&m_State[i]);
+            
+            hash[i * 4] = *pointerIndex++;
+            hash[i * 4 + 1] = *pointerIndex++;
+            hash[i * 4 + 2] = *pointerIndex++;
+            hash[i * 4 + 3] = *pointerIndex;
+        }
+    #endif
+#else
+    // No byte swap needed, host is big endian. Just copy hash data
+    uint8_t* pointerIndex;
+    for(uint8_t i = 0; i < 8; i++)
     {
-        hash[i]      = (m_State[0] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 4]  = (m_State[1] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 8]  = (m_State[2] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 12] = (m_State[3] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 16] = (m_State[4] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 20] = (m_State[5] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 24] = (m_State[6] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 28] = (m_State[7] >> (24 - i * 8)) & 0x000000ff;
+        pointerIndex = reinterpret_cast<uint8_t*>(&m_State[i]);
+        
+        hash[i * 4] = *pointerIndex++;
+        hash[i * 4 + 1] = *pointerIndex++;
+        hash[i * 4 + 2] = *pointerIndex++;
+        hash[i * 4 + 3] = *pointerIndex;
     }
+#endif
     
     return hash;
 }
+
+#endif /* HM_SIMD_ARM */

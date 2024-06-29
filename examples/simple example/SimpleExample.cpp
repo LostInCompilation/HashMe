@@ -47,8 +47,8 @@ using namespace HashMe;
 
 // ***************************************************
 // Test data
-const uint64_t bigDataSize = 100 * 1024 * 1024; // 500MB
-std::vector<uint8_t>* bigData = nullptr; // Allocate on heap to prevent "Compiler out of heap space error in VisualStudio"
+const uint64_t bigDataSize = 200 * 1024 * 1024; // 50MB
+std::vector<uint8_t>* bigData = nullptr; // Allocate on heap to prevent "Compiler out of heap space error" in VisualStudio
 
 const std::string testString = "123";
 const std::string testStringHashSHA256 = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
@@ -79,11 +79,8 @@ void SHA256_Software(picobench::state& s)
         s.start_timer();
         
         hasher.Reset();
-        
-        //hasher.Update(bigData.data(), bigData.size());
-        //hasher.Update(bigData);
-        hasher.Update(testString);
-        
+        hasher.Update(*bigData);
+        //hasher.Update(testString);
         hashResult = hasher.End();
         
         s.stop_timer();
@@ -96,7 +93,7 @@ void SHA256_Software(picobench::state& s)
     const double speed = static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
     std::cout << "Speed (Software): " << std::fixed << speed << " MB/s" << std::endl << std::endl;
 }
-PICOBENCH(SHA256_Software);
+//PICOBENCH(SHA256_Software).baseline();
 
 // ***************************************************
 // SHA256 hardware implementation
@@ -110,11 +107,8 @@ void SHA256_Hardware(picobench::state& s)
         s.start_timer();
         
         hasher.Reset();
-        
-        //hasher.Update(bigData.data(), bigData.size());
-        //hasher.Update(bigData);
-        hasher.Update(testString);
-        
+        hasher.Update(*bigData);
+        //hasher.Update(testString);
         hashResult = hasher.End();
         
         s.stop_timer();
@@ -127,7 +121,35 @@ void SHA256_Hardware(picobench::state& s)
     const double speed = static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
     std::cout << "Speed (Hardware): " << std::fixed << speed << " MB/s" << std::endl << std::endl;
 }
-PICOBENCH(SHA256_Hardware);
+//PICOBENCH(SHA256_Hardware);
+
+// ***************************************************
+// MD5 software implementation
+void MD5_Software(picobench::state& s)
+{
+    std::vector<uint8_t> hashResult;
+    Hasher<MD5, SOFTWARE> hasher;
+    
+    for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
+    {
+        s.start_timer();
+        
+        hasher.Reset();
+        //hasher.Update(*bigData);
+        hasher.Update(testString);
+        hashResult = hasher.End();
+        
+        s.stop_timer();
+    }
+    
+    // Print hash
+    std::cout << "MD5 (Software): " << HashToHexString(hashResult) << std::endl;
+    
+    // Print speed
+    //const double speed = static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
+    //std::cout << "Speed (Software): " << std::fixed << speed << " MB/s" << std::endl << std::endl;
+}
+PICOBENCH(MD5_Software);
 
 // ***************************************************
 // Fill big data with random values
@@ -149,16 +171,13 @@ void PrepareBigData()
 
 int main()
 {
-    std::cout << "ARM version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_ARCH_ARM) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_ARCH_ARM) << std::endl;
-    //HASH_PREDEF_VERSION_NUMBER(4,0,0);
-    
     // ***************************************************
     // Architecture
 #ifdef HASH_PREDEF_ARCH_ARM_AVAILABLE
-    std::cout << "ARM architecture" << std::endl;
-#elif defined(HASH_PREDEF_ARCH_X86_32)
-    std::cout << "x86 architecture" << std::endl;
-#elif defined(HASH_PREDEF_ARCH_X86_64)
+    std::cout << "ARM architecture. Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_ARCH_ARM) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_ARCH_ARM) << std::endl;
+#elif defined(HASH_PREDEF_ARCH_X86_32_AVAILABLE)
+    std::cout << "x86_32 architecture" << std::endl;
+#elif defined(HASH_PREDEF_ARCH_X86_64_AVAILABLE)
     std::cout << "x86_64 architecture" << std::endl;
 #endif
     
@@ -186,19 +205,17 @@ int main()
     std::cout << "x86 SIMD detected. Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_HW_SIMD_X86) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_HW_SIMD_X86) << std::endl;
 #endif
     
-    return 0;
-   
-    
     PrintStartupHeader();
     
     // Fill big data with random values
     PrepareBigData();
     
     // ***************************************************
-    // Benchmark SHA256
-    picobench::runner runner(0); // Use 0 as the seed
-    runner.set_default_samples(1);
-    runner.set_default_state_iterations({1, 2, 4, 8, 16});
+    // Benchmark
+    picobench::runner runner(0); // Use 0 as the RNG seed
+    runner.set_default_samples(2);
+    //runner.set_default_state_iterations({1, 2, 8, 32, 64});
+    runner.set_default_state_iterations({1, 2, 4, 8});
     runner.run_benchmarks();
     
     // ***************************************************

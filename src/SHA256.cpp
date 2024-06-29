@@ -36,7 +36,7 @@ the following restrictions:
 using namespace HashMe;
 
 // Constants
-const std::array<uint32_t, 64> K = {
+constexpr std::array<uint32_t, 64> K = {
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
     0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -47,18 +47,18 @@ const std::array<uint32_t, 64> K = {
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-const std::array<uint32_t, 8> INITIAL_HASH_VALUES = {
+constexpr std::array<uint32_t, 8> INITIAL_HASH_VALUES = {
     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
     0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
 };
 
 // SHA256 logic functions
-constexpr uint32_t Sigma0(const uint32_t x)     { return std::rotr(x, 7) ^ std::rotr(x, 18) ^ (x >> 3); }
-constexpr uint32_t Sigma1(const uint32_t x)     { return std::rotr(x, 17) ^ std::rotr(x, 19) ^ (x >> 10); }
-constexpr uint32_t Epsilon0(const uint32_t x)   { return std::rotr(x, 2) ^ std::rotr(x, 13) ^ std::rotr(x, 22); }
-constexpr uint32_t Epsilon1(const uint32_t x)   { return std::rotr(x, 6) ^ std::rotr(x, 11) ^ std::rotr(x, 25); }
-constexpr uint32_t Majority(const uint32_t x, const uint32_t y, const uint32_t z)   { return (x & y) ^ (x & z) ^ (y & z); }
-constexpr uint32_t Choose(const uint32_t x, const uint32_t y, const uint32_t z)     { return (x & y) ^ (~x & z); }
+constexpr inline uint32_t Sigma0(const uint32_t x)     { return std::rotr(x, 7) ^ std::rotr(x, 18) ^ (x >> 3); }
+constexpr inline uint32_t Sigma1(const uint32_t x)     { return std::rotr(x, 17) ^ std::rotr(x, 19) ^ (x >> 10); }
+constexpr inline uint32_t Epsilon0(const uint32_t x)   { return std::rotr(x, 2) ^ std::rotr(x, 13) ^ std::rotr(x, 22); }
+constexpr inline uint32_t Epsilon1(const uint32_t x)   { return std::rotr(x, 6) ^ std::rotr(x, 11) ^ std::rotr(x, 25); }
+constexpr inline uint32_t Majority(const uint32_t x, const uint32_t y, const uint32_t z)   { return (x & y) ^ (x & z) ^ (y & z); }
+constexpr inline uint32_t Choose(const uint32_t x, const uint32_t y, const uint32_t z)     { return (x & y) ^ (~x & z); }
 
 Hasher<SHA256, SOFTWARE>::Hasher()
 {
@@ -81,6 +81,23 @@ Hasher<SHA256, SOFTWARE>::Hasher(const Hasher& other)
     
     std::copy(other.m_Context->state, other.m_Context->state + 8, m_Context->state);
     std::copy(other.m_Context->buffer, other.m_Context->buffer + SHA256_BLOCK_LENGTH, m_Context->buffer);
+}
+
+void Hasher<SHA256, SOFTWARE>::Initialize()
+{
+    // Set state to initial hash values
+    std::copy(INITIAL_HASH_VALUES.begin(), INITIAL_HASH_VALUES.end(), m_Context->state);
+    
+    m_Context->bufferSize = 0;
+    m_Context->numOfBits = 0;
+}
+
+void Hasher<SHA256, SOFTWARE>::Reset()
+{
+    Initialize();
+    
+    // Zero out buffer
+    std::memset(m_Context->buffer, 0, SHA256_BLOCK_LENGTH);
 }
 
 // Old transform function
@@ -203,29 +220,12 @@ void Hasher<SHA256, SOFTWARE>::Transform(const uint8_t* const data)
     m_Context->state[5] += f;
     m_Context->state[6] += g;
     m_Context->state[7] += h;
+    
+    // Cleanup sensitive data for security
+    a = b = c = d = e = f = g = h = t1 = t2 = 0;
 }
 
-void Hasher<SHA256, SOFTWARE>::Initialize()
-{
-    // Set state to initial hash values
-    std::copy(INITIAL_HASH_VALUES.begin(), INITIAL_HASH_VALUES.end(), m_Context->state);
-    
-    m_Context->bufferSize = 0;
-    m_Context->numOfBits = 0;
-}
-
-void Hasher<SHA256, SOFTWARE>::Reset()
-{
-    // Set state to initial hash values
-    std::copy(INITIAL_HASH_VALUES.begin(), INITIAL_HASH_VALUES.end(), m_Context->state);
-    
-    // Zero out buffer
-    std::memset(m_Context->buffer, 0, SHA256_BLOCK_LENGTH);
-    
-    m_Context->bufferSize = 0;
-    m_Context->numOfBits = 0;
-}
-
+// TODO: optimize
 void Hasher<SHA256, SOFTWARE>::Update(const uint8_t* const data, const uint64_t size)
 {
     if(!data)

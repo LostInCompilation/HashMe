@@ -34,6 +34,8 @@ the following restrictions:
 #ifndef SHA256_Hardware_hpp
 #define SHA256_Hardware_hpp
 
+#ifdef HM_SIMD_ARM
+
 namespace HashMe
 {
 
@@ -80,5 +82,7 @@ public:
 };
 
 }
+
+#endif /* HM_SIMD_ARM */
 
 #endif /* SHA256_Hardware_hpp */
