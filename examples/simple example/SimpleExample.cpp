@@ -48,7 +48,7 @@ using namespace HashMe;
 // ***************************************************
 // Test data
 const uint64_t bigDataSize = 100 * 1024 * 1024; // 500MB
-std::vector<uint8_t> bigData(bigDataSize);
+std::vector<uint8_t>* bigData = nullptr; // Allocate on heap to prevent "Compiler out of heap space error in VisualStudio"
 
 const std::string testString = "123";
 const std::string testStringHashSHA256 = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
@@ -135,6 +135,8 @@ void PrepareBigData()
 {
     std::cout << "Generating random big data...";
     
+    bigData = new std::vector<uint8_t>(bigDataSize);
+    
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_int_distribution<uint8_t> dist(0, 255);
@@ -211,6 +213,8 @@ int main()
     
     // Use hardware implementation
     //SHA256_Hardware();
+    
+    delete bigData;
     
     return 0;
 }
