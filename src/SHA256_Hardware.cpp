@@ -28,12 +28,10 @@ the following restrictions:
 /*                            See license                           */
 /*                                                                  */
 /*  SHA256_Hardware.cpp                                             */
-/*  Created: 26.06.2024                                             */
+/*  Created: 27.06.2024                                             */
 /*------------------------------------------------------------------*/
 
 #include "HashMe.hpp"
-
-#include <arm_neon.h>
 
 using namespace HashMe;
 
@@ -54,17 +52,33 @@ const std::array<uint32_t, 8> INITIAL_HASH_VALUES = {
     0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
 };
 
+Hasher<SHA256, HARDWARE>::Hasher()
+{
+    Initialize();
+}
+
+Hasher<SHA256, HARDWARE>::Hasher(const Hasher& other)
+{
+    std::copy(other.m_State, other.m_State + 8, m_State);
+}
+
 void Hasher<SHA256, HARDWARE>::Initialize()
 {
     // Set state to initial hash values
     std::copy(INITIAL_HASH_VALUES.begin(), INITIAL_HASH_VALUES.end(), m_State);
 }
 
+void Hasher<SHA256, HARDWARE>::Reset()
+{
+    Initialize();
+}
+
 uint64_t Hasher<SHA256, HARDWARE>::PrepareData(const uint8_t* const data, const uint64_t size, uint8_t** const preparedData)
 {
-    const uint64_t dataSizeInBits = size * 8;
+    const uint64_t dataSizeInBits = size << 3; // size * 8
     const uint64_t padding = 512 - ((dataSizeInBits + 1 + 64) % 512);
-    const uint64_t zeroPaddingArraySize = 1 + (padding / 8) + 8;
+    const uint64_t paddingDiv8 = padding >> 3; // padding / 8
+    const uint64_t zeroPaddingArraySize = 1 + paddingDiv8 + 8;
     
     // Add a 1 at beginning and append n zero bits
     uint8_t* const zeroPadding = new uint8_t[zeroPaddingArraySize];
@@ -72,7 +86,7 @@ uint64_t Hasher<SHA256, HARDWARE>::PrepareData(const uint8_t* const data, const 
     zeroPadding[0] = 0x80;
     
     // Append data size (uint64_t as big endian) to the end of zeroPadding array
-    const uint8_t index = 1 + (padding / 8);
+    const uint8_t index = 1 + paddingDiv8;
     zeroPadding[index + 7] = dataSizeInBits;
     zeroPadding[index + 6] = dataSizeInBits >> 8;
     zeroPadding[index + 5] = dataSizeInBits >> 16;
@@ -117,7 +131,7 @@ void Hasher<SHA256, HARDWARE>::ProcessARM(const uint8_t* preparedData, uint64_t 
         MSG2 = vld1q_u32((const uint32_t *)(preparedData + 32));
         MSG3 = vld1q_u32((const uint32_t *)(preparedData + 48));
 
-        // Reverse data for little endian
+        // Reverse data for host little endian, since SHA needs big endian
         MSG0 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG0)));
         MSG1 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG1)));
         MSG2 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG2)));

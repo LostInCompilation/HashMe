@@ -36,10 +36,12 @@ add_library("${PROJECT_NAME}"
 	src/HashMe.cpp
 	src/SHA256.cpp
 	src/SHA256_Hardware.cpp
+	src/MD5.cpp
 )
 
 # The projects include directories
 target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/predef")
 
 ###########################################################
 # Project versioning

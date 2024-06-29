@@ -34,5 +34,20 @@ the following restrictions:
 #ifndef PlatformConfig_hpp
 #define PlatformConfig_hpp
 
+// ***************************************************
+// Endianness
+#ifdef HASH_PREDEF_ENDIAN_BIG_BYTE_AVAILABLE
+#define HM_BIG_ENDIAN
+#elif defined(HASH_PREDEF_ENDIAN_LITTLE_BYTE_AVAILABLE)
+#define HM_LITTLE_ENDIAN
+#elif define(HASH_PREDEF_ENDIAN_BIG_WORD_AVAILABLE) || defined(HASH_PREDEF_ENDIAN_LITTLE_WORD_AVAILABLE)
+#error Middle endian is not supported.
+#endif
+
+
+// SIMD
+
+// ARM
+#include <arm_neon.h>
 
 #endif /* PlatformConfig_hpp */

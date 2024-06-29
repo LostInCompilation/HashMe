@@ -43,9 +43,15 @@ class HasherBase
 {
 protected:
     HasherBase() = default;
+    ~HasherBase() = default;
     
 public:
+    HasherBase(const HasherBase& other) = delete;
+    HasherBase& operator=(const HasherBase& other) = delete;
+    const HasherBase& operator=(const HasherBase& other) const = delete;
+    
     virtual void Initialize() = 0;
+    virtual void Reset() = 0;
     
     virtual void Update(const uint8_t* const data, const uint64_t size) = 0;
     virtual void Update(const std::vector<uint8_t>& data) = 0;

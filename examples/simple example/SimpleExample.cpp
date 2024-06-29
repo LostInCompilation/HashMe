@@ -47,9 +47,11 @@ using namespace HashMe;
 
 // ***************************************************
 // Test data
-const uint64_t bigDataSize = 500 * 1024 * 1024; // 500MB
+const uint64_t bigDataSize = 100 * 1024 * 1024; // 500MB
 std::vector<uint8_t> bigData(bigDataSize);
+
 const std::string testString = "123";
+const std::string testStringHashSHA256 = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
 
 // ***************************************************
 // Startup text
@@ -68,18 +70,19 @@ void PrintStartupHeader()
 // SHA256 software implementation
 void SHA256_Software(picobench::state& s)
 {
-    Hasher<SHA256, SOFTWARE> hasher;
     std::vector<uint8_t> hashResult;
+    Hasher<SHA256, SOFTWARE> hasher;
+    Hasher<SHA256, SOFTWARE> h1 = hasher;
     
     for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
     {
         s.start_timer();
         
-        hasher.Initialize();
+        hasher.Reset();
         
         //hasher.Update(bigData.data(), bigData.size());
-        hasher.Update(bigData);
-        //hasher.Update(testString);
+        //hasher.Update(bigData);
+        hasher.Update(testString);
         
         hashResult = hasher.End();
         
@@ -99,18 +102,18 @@ PICOBENCH(SHA256_Software);
 // SHA256 hardware implementation
 void SHA256_Hardware(picobench::state& s)
 {
-    Hasher<SHA256, HARDWARE> hasher;
     std::vector<uint8_t> hashResult;
+    Hasher<SHA256, HARDWARE> hasher;
     
     for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
     {
         s.start_timer();
         
-        hasher.Initialize();
+        hasher.Reset();
         
         //hasher.Update(bigData.data(), bigData.size());
-        hasher.Update(bigData);
-        //hasher.Update(testString);
+        //hasher.Update(bigData);
+        hasher.Update(testString);
         
         hashResult = hasher.End();
         
@@ -144,6 +147,46 @@ void PrepareBigData()
 
 int main()
 {
+    std::cout << "ARM version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_ARCH_ARM) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_ARCH_ARM) << std::endl;
+    //HASH_PREDEF_VERSION_NUMBER(4,0,0);
+    
+    // ***************************************************
+    // Architecture
+#ifdef HASH_PREDEF_ARCH_ARM_AVAILABLE
+    std::cout << "ARM architecture" << std::endl;
+#elif defined(HASH_PREDEF_ARCH_X86_32)
+    std::cout << "x86 architecture" << std::endl;
+#elif defined(HASH_PREDEF_ARCH_X86_64)
+    std::cout << "x86_64 architecture" << std::endl;
+#endif
+    
+    // ***************************************************
+    // Endianness
+#ifdef HM_BIG_ENDIAN
+    std::cout << "Big endian" << std::endl;
+#elif defined(HM_LITTLE_ENDIAN)
+    std::cout << "Little endian" << std::endl;
+#endif
+    
+    // ***************************************************
+    // Check for SIMD
+#if defined(HASH_PREDEF_HW_SIMD_AVAILABLE)
+    std::cout << "SIMD detected" << std::endl;
+#endif
+    
+    // ARM SIMD
+#if HASH_PREDEF_HW_SIMD_ARM
+    std::cout << "ARM SIMD detected. Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_HW_SIMD_ARM) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_HW_SIMD_ARM) << std::endl;
+#endif
+    
+    // X86 SIMD
+#if HASH_PREDEF_HW_SIMD_X86
+    std::cout << "x86 SIMD detected. Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_HW_SIMD_X86) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_HW_SIMD_X86) << std::endl;
+#endif
+    
+    return 0;
+   
+    
     PrintStartupHeader();
     
     // Fill big data with random values
@@ -151,13 +194,13 @@ int main()
     
     // ***************************************************
     // Benchmark SHA256
-    picobench::runner runner(0); // Use 0 as seed
+    picobench::runner runner(0); // Use 0 as the seed
     runner.set_default_samples(1);
-    runner.set_default_state_iterations({1});
+    runner.set_default_state_iterations({1, 2, 4, 8, 16});
     runner.run_benchmarks();
     
     // ***************************************************
-    // Genereate report
+    // Generate report
     const auto report = runner.generate_report();
     report.to_text(std::cout);
     //report.to_text_concise(std::cout); // No iterations breakdown

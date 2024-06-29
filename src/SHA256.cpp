@@ -52,20 +52,39 @@ const std::array<uint32_t, 8> INITIAL_HASH_VALUES = {
     0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
 };
 
-// Macros (TODO: rework)
-#define ROTATE_LEFT(a,b) (((a) << (b)) | ((a) >> (32-(b))))
-#define ROTATE_RIGHT(a,b) (((a) >> (b)) | ((a) << (32-(b))))
+// SHA256 logic functions
+constexpr uint32_t Sigma0(const uint32_t x)     { return std::rotr(x, 7) ^ std::rotr(x, 18) ^ (x >> 3); }
+constexpr uint32_t Sigma1(const uint32_t x)     { return std::rotr(x, 17) ^ std::rotr(x, 19) ^ (x >> 10); }
+constexpr uint32_t Epsilon0(const uint32_t x)   { return std::rotr(x, 2) ^ std::rotr(x, 13) ^ std::rotr(x, 22); }
+constexpr uint32_t Epsilon1(const uint32_t x)   { return std::rotr(x, 6) ^ std::rotr(x, 11) ^ std::rotr(x, 25); }
+constexpr uint32_t Majority(const uint32_t x, const uint32_t y, const uint32_t z)   { return (x & y) ^ (x & z) ^ (y & z); }
+constexpr uint32_t Choose(const uint32_t x, const uint32_t y, const uint32_t z)     { return (x & y) ^ (~x & z); }
 
-#define CH(x,y,z) (((x) & (y)) ^ (~(x) & (z)))
-#define MAJ(x,y,z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+Hasher<SHA256, SOFTWARE>::Hasher()
+{
+    m_Context = new Context;
+    
+    Initialize();
+}
 
-#define EP0(x) (ROTATE_RIGHT(x,2) ^ ROTATE_RIGHT(x,13) ^ ROTATE_RIGHT(x,22))
-#define EP1(x) (ROTATE_RIGHT(x,6) ^ ROTATE_RIGHT(x,11) ^ ROTATE_RIGHT(x,25))
+Hasher<SHA256, SOFTWARE>::~Hasher()
+{
+    delete m_Context;
+}
 
-#define SIG0(x) (ROTATE_RIGHT(x,7) ^ ROTATE_RIGHT(x,18) ^ ((x) >> 3))
-#define SIG1(x) (ROTATE_RIGHT(x,17) ^ ROTATE_RIGHT(x,19) ^ ((x) >> 10))
+Hasher<SHA256, SOFTWARE>::Hasher(const Hasher& other)
+{
+    m_Context = new Context;
+    
+    m_Context->bufferSize = other.m_Context->bufferSize;
+    m_Context->numOfBits = other.m_Context->numOfBits;
+    
+    std::copy(other.m_Context->state, other.m_Context->state + 8, m_Context->state);
+    std::copy(other.m_Context->buffer, other.m_Context->buffer + SHA256_BLOCK_LENGTH, m_Context->buffer);
+}
 
-void Hasher<SHA256, SOFTWARE>::Transform(const uint8_t* const data)
+// Old transform function
+/*void Hasher<SHA256, SOFTWARE>::Transform(const uint8_t* const data)
 {
     uint32_t block[SHA256_BLOCK_LENGTH];
     
@@ -79,26 +98,25 @@ void Hasher<SHA256, SOFTWARE>::Transform(const uint8_t* const data)
     
     for(uint8_t i = 16; i < 64; i++)
     {
-        block[i] = SIG1(block[i - 2]) + block[i - 7] + SIG0(block[i - 15]) + block[i - 16];
+        block[i] = Sigma1(block[i - 2]) + block[i - 7] + Sigma0(block[i - 15]) + block[i - 16];
     }
     
     // Initial values
-    uint32_t a = m_Context.state[0];
-    uint32_t b = m_Context.state[1];
-    uint32_t c = m_Context.state[2];
-    uint32_t d = m_Context.state[3];
-    uint32_t e = m_Context.state[4];
-    uint32_t f = m_Context.state[5];
-    uint32_t g = m_Context.state[6];
-    uint32_t h = m_Context.state[7];
-    
-    uint32_t t1 = 0;
-    uint32_t t2 = 0;
+    uint32_t a = m_Context->state[0];
+    uint32_t b = m_Context->state[1];
+    uint32_t c = m_Context->state[2];
+    uint32_t d = m_Context->state[3];
+    uint32_t e = m_Context->state[4];
+    uint32_t f = m_Context->state[5];
+    uint32_t g = m_Context->state[6];
+    uint32_t h = m_Context->state[7];
+    uint32_t t1;
+    uint32_t t2;
     
     for(uint8_t i = 0; i < 64; i++)
     {
-        t1 = h + EP1(e) + CH(e, f, g) + K[i] + block[i];
-        t2 = EP0(a) + MAJ(a, b, c);
+        t1 = h + Epsilon1(e) + Choose(e, f, g) + K[i] + block[i];
+        t2 = Epsilon0(a) + Majority(a, b, c);
         h = g;
         g = f;
         f = e;
@@ -109,23 +127,103 @@ void Hasher<SHA256, SOFTWARE>::Transform(const uint8_t* const data)
         a = t1 + t2;
     }
     
-    m_Context.state[0] += a;
-    m_Context.state[1] += b;
-    m_Context.state[2] += c;
-    m_Context.state[3] += d;
-    m_Context.state[4] += e;
-    m_Context.state[5] += f;
-    m_Context.state[6] += g;
-    m_Context.state[7] += h;
+    m_Context->state[0] += a;
+    m_Context->state[1] += b;
+    m_Context->state[2] += c;
+    m_Context->state[3] += d;
+    m_Context->state[4] += e;
+    m_Context->state[5] += f;
+    m_Context->state[6] += g;
+    m_Context->state[7] += h;
+}*/
+
+// Optimized transform function
+void Hasher<SHA256, SOFTWARE>::Transform(const uint8_t* const data)
+{
+    uint32_t block[SHA256_BLOCK_LENGTH];
+    
+    // Initial values
+    uint32_t a = m_Context->state[0];
+    uint32_t b = m_Context->state[1];
+    uint32_t c = m_Context->state[2];
+    uint32_t d = m_Context->state[3];
+    uint32_t e = m_Context->state[4];
+    uint32_t f = m_Context->state[5];
+    uint32_t g = m_Context->state[6];
+    uint32_t h = m_Context->state[7];
+    uint32_t t1;
+    uint32_t t2;
+    
+    uint8_t x = 0;
+    uint8_t i = 0;
+    for(; i < 16; i++)
+    {
+        // Copy 1-byte data to 4-byte array, convert to big endianness
+        block[i] = (data[x] << 24) | (data[x + 1] << 16) | (data[x + 2] << 8) | (data[x + 3]);
+        x += 4;
+        
+        t1 = h + Epsilon1(e) + Choose(e, f, g) + K[i] + block[i];
+        t2 = Epsilon0(a) + Majority(a, b, c);
+        h = g;
+        g = f;
+        f = e;
+        e = d + t1;
+        d = c;
+        c = b;
+        b = a;
+        a = t1 + t2;
+    }
+    
+    uint32_t s0;
+    uint32_t s1;
+    for(; i < 64; i++)
+    {
+        s0 = Sigma0(block[(i + 1) & 0x0F]);
+        s1 = Sigma1(block[(i + 14) & 0x0F]);
+        
+        const uint32_t tmp = (block[i & 0x0F] += s1 + block[(i + 9) & 0x0F] + s0);
+        
+        t1 = h + Epsilon1(e) + Choose(e, f, g) + K[i] + tmp;
+        t2 = Epsilon0(a) + Majority(a, b, c);
+        h = g;
+        g = f;
+        f = e;
+        e = d + t1;
+        d = c;
+        c = b;
+        b = a;
+        a = t1 + t2;
+    }
+    
+    m_Context->state[0] += a;
+    m_Context->state[1] += b;
+    m_Context->state[2] += c;
+    m_Context->state[3] += d;
+    m_Context->state[4] += e;
+    m_Context->state[5] += f;
+    m_Context->state[6] += g;
+    m_Context->state[7] += h;
 }
 
 void Hasher<SHA256, SOFTWARE>::Initialize()
 {
     // Set state to initial hash values
-    std::copy(INITIAL_HASH_VALUES.begin(), INITIAL_HASH_VALUES.end(), m_Context.state);
+    std::copy(INITIAL_HASH_VALUES.begin(), INITIAL_HASH_VALUES.end(), m_Context->state);
     
-    m_Context.bufferSize = 0;
-    m_Context.numOfBits = 0;
+    m_Context->bufferSize = 0;
+    m_Context->numOfBits = 0;
+}
+
+void Hasher<SHA256, SOFTWARE>::Reset()
+{
+    // Set state to initial hash values
+    std::copy(INITIAL_HASH_VALUES.begin(), INITIAL_HASH_VALUES.end(), m_Context->state);
+    
+    // Zero out buffer
+    std::memset(m_Context->buffer, 0, SHA256_BLOCK_LENGTH);
+    
+    m_Context->bufferSize = 0;
+    m_Context->numOfBits = 0;
 }
 
 void Hasher<SHA256, SOFTWARE>::Update(const uint8_t* const data, const uint64_t size)
@@ -139,15 +237,15 @@ void Hasher<SHA256, SOFTWARE>::Update(const uint8_t* const data, const uint64_t 
     // Fill buffer with 64 bytes
     for(uint64_t i = 0; i < size; i++)
     {
-        m_Context.buffer[m_Context.bufferSize] = data[i];
-        m_Context.bufferSize++;
+        m_Context->buffer[m_Context->bufferSize] = data[i];
+        m_Context->bufferSize++;
         
-        if(m_Context.bufferSize == SHA256_BLOCK_LENGTH)
+        if(m_Context->bufferSize == SHA256_BLOCK_LENGTH)
         {
-            Transform(m_Context.buffer);
+            Transform(m_Context->buffer);
             
-            m_Context.bufferSize = 0;
-            m_Context.numOfBits += 512;
+            m_Context->bufferSize = 0;
+            m_Context->numOfBits += 512;
         }
     }
 }
@@ -164,59 +262,59 @@ void Hasher<SHA256, SOFTWARE>::Update(const std::string& str)
 
 std::vector<uint8_t> Hasher<SHA256, SOFTWARE>::End()
 {
-    uint8_t bufferSize = m_Context.bufferSize;
+    uint8_t bufferSize = m_Context->bufferSize;
     
     // Pad last block
-    if(m_Context.bufferSize < 56)
+    if(m_Context->bufferSize < 56)
     {
-        m_Context.buffer[bufferSize] = 0x80;
+        m_Context->buffer[bufferSize] = 0x80;
         bufferSize++;
         
         for(; bufferSize < 56; bufferSize++)
-            m_Context.buffer[bufferSize] = 0x00;
+            m_Context->buffer[bufferSize] = 0x00;
     }
     else
     {
-        m_Context.buffer[bufferSize] = 0x80;
+        m_Context->buffer[bufferSize] = 0x80;
         bufferSize++;
         
         for(; bufferSize < 64; bufferSize++)
-            m_Context.buffer[bufferSize] = 0x00;
+            m_Context->buffer[bufferSize] = 0x00;
         
-        Transform(m_Context.buffer);
+        Transform(m_Context->buffer);
         
-        std::memset(m_Context.buffer, 0, 56);
+        std::memset(m_Context->buffer, 0, 56);
     }
     
     // Append message length in bits
-    m_Context.numOfBits += m_Context.bufferSize * 8;
+    m_Context->numOfBits += m_Context->bufferSize * 8;
     
-    m_Context.buffer[63] = m_Context.numOfBits;
-    m_Context.buffer[62] = m_Context.numOfBits >> 8;
-    m_Context.buffer[61] = m_Context.numOfBits >> 16;
-    m_Context.buffer[60] = m_Context.numOfBits >> 24;
+    m_Context->buffer[63] = m_Context->numOfBits;
+    m_Context->buffer[62] = m_Context->numOfBits >> 8;
+    m_Context->buffer[61] = m_Context->numOfBits >> 16;
+    m_Context->buffer[60] = m_Context->numOfBits >> 24;
     
-    m_Context.buffer[59] = m_Context.numOfBits >> 32;
-    m_Context.buffer[58] = m_Context.numOfBits >> 40;
-    m_Context.buffer[57] = m_Context.numOfBits >> 48;
-    m_Context.buffer[56] = m_Context.numOfBits >> 56;
+    m_Context->buffer[59] = m_Context->numOfBits >> 32;
+    m_Context->buffer[58] = m_Context->numOfBits >> 40;
+    m_Context->buffer[57] = m_Context->numOfBits >> 48;
+    m_Context->buffer[56] = m_Context->numOfBits >> 56;
     
     // Transform
-    Transform(m_Context.buffer);
+    Transform(m_Context->buffer);
     
     std::vector<uint8_t> hash(32); // 256 bit hash
     
     // Transform SHA big endian to host little endian
     for(uint8_t i = 0; i < 4; i++)
     {
-        hash[i]      = (m_Context.state[0] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 4]  = (m_Context.state[1] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 8]  = (m_Context.state[2] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 12] = (m_Context.state[3] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 16] = (m_Context.state[4] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 20] = (m_Context.state[5] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 24] = (m_Context.state[6] >> (24 - i * 8)) & 0x000000ff;
-        hash[i + 28] = (m_Context.state[7] >> (24 - i * 8)) & 0x000000ff;
+        hash[i]      = (m_Context->state[0] >> (24 - i * 8)) & 0x000000ff;
+        hash[i + 4]  = (m_Context->state[1] >> (24 - i * 8)) & 0x000000ff;
+        hash[i + 8]  = (m_Context->state[2] >> (24 - i * 8)) & 0x000000ff;
+        hash[i + 12] = (m_Context->state[3] >> (24 - i * 8)) & 0x000000ff;
+        hash[i + 16] = (m_Context->state[4] >> (24 - i * 8)) & 0x000000ff;
+        hash[i + 20] = (m_Context->state[5] >> (24 - i * 8)) & 0x000000ff;
+        hash[i + 24] = (m_Context->state[6] >> (24 - i * 8)) & 0x000000ff;
+        hash[i + 28] = (m_Context->state[7] >> (24 - i * 8)) & 0x000000ff;
     }
     
     return hash;

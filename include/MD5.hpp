@@ -28,7 +28,7 @@ the following restrictions:
 /*                            See license                           */
 /*                                                                  */
 /*  MD5.hpp                                                         */
-/*  Created: 26.06.2024                                             */
+/*  Created: 28.06.2024                                             */
 /*------------------------------------------------------------------*/
 
 #ifndef MD5_hpp
@@ -48,18 +48,18 @@ class Hasher;
 
 // ***************************************************
 // Hasher class for MD5
-//template <>
-//class Hasher<MD5, SOFTWARE> : public HasherBase
-//{
-//private:
-//    
-//public:
-//    Hasher() = default;
-//    
-//    virtual void Initialize() override;
-//    virtual void Update() override;
-//    virtual void End() override;
-//};
+template <>
+class Hasher<MD5, SOFTWARE> : public HasherBase
+{
+private:
+    
+public:
+    Hasher() = default;
+    
+    virtual void Initialize() override;
+    virtual void Update() override;
+    virtual void End() override;
+};
 
 }
 

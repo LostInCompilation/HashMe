@@ -28,7 +28,7 @@ the following restrictions:
 /*                            See license                           */
 /*                                                                  */
 /*  SHA256_Hardware.hpp                                             */
-/*  Created: 26.06.2024                                             */
+/*  Created: 27.06.2024                                             */
 /*------------------------------------------------------------------*/
 
 #ifndef SHA256_Hardware_hpp
@@ -52,15 +52,25 @@ template <>
 class Hasher<SHA256, HARDWARE> : public HasherBase
 {
 private:
-    uint32_t    m_State[8];
+    uint32_t     m_State[8];
     
-    uint64_t PrepareData(const uint8_t* const data, const uint64_t size, uint8_t** const preparedData);
-    void ProcessARM(const uint8_t* preparedData, uint64_t size);
+    // Methods
+    virtual void Initialize() override;
+    
+    uint64_t     PrepareData(const uint8_t* const data, const uint64_t size, uint8_t** const preparedData);
+    void         ProcessARM(const uint8_t* preparedData, uint64_t size);
     
 public:
-    Hasher() = default;
+    Hasher();
+    ~Hasher() = default;
     
-    virtual void Initialize() override;
+    // Allow copy but no assign
+    Hasher(const Hasher& other);
+    Hasher& operator=(const Hasher& other) = delete;
+    const Hasher& operator=(const Hasher& other) const = delete;
+    
+    // Methods
+    virtual void Reset() override;
     
     virtual void Update(const uint8_t* const data, const uint64_t size) override;
     virtual void Update(const std::vector<uint8_t>& data) override;

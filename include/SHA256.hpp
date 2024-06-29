@@ -52,26 +52,36 @@ template <>
 class Hasher<SHA256, SOFTWARE> : public HasherBase
 {
 private:
+    // Constants
     static const uint32_t SHA256_BLOCK_LENGTH = 64; // TODO: check if used everywhere
     
     struct Context
     {
-        uint32_t    state[8];
+        uint32_t    state[8] = {};
         
         uint8_t     bufferSize = 0;
         uint64_t    numOfBits = 0;
-        uint8_t     buffer[SHA256_BLOCK_LENGTH];
+        uint8_t     buffer[SHA256_BLOCK_LENGTH] = {};
     };
     
     // Our context
-    Context     m_Context;
+    Context*     m_Context = nullptr;
 
+    // Methods
+    virtual void Initialize() override;
     void Transform(const uint8_t* const data);
     
 public:
-    Hasher() = default;
+    Hasher();
+    ~Hasher();
     
-    virtual void Initialize() override;
+    // Allow copy but no assign
+    Hasher(const Hasher& other);
+    Hasher& operator=(const Hasher& other) = delete;
+    const Hasher& operator=(const Hasher& other) const = delete;
+    
+    // Methods
+    virtual void Reset() override;
     
     virtual void Update(const uint8_t* const data, const uint64_t size) override;
     virtual void Update(const std::vector<uint8_t>& data) override;

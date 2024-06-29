@@ -26,6 +26,7 @@ add_executable("${PROJECT_NAME}"
 # Use HashMe lib
 target_link_libraries("${PROJECT_NAME}" PRIVATE HashMe)
 target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_SOURCE_DIR}/include")
+target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_SOURCE_DIR}/predef")
 
 #############################################################
 target_compile_options("${PROJECT_NAME}" PRIVATE "-O3")
