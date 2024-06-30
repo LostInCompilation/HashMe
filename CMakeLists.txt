@@ -3,9 +3,6 @@ cmake_minimum_required(VERSION 3.29)
 # Print build type
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
-# TODO: Check if needed for macOS
-#set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum OS X deployment version")
-
 ###########################################################
 # Set options for sub projects
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW) # Needed to set options of subprojects inside parent project
@@ -55,7 +52,7 @@ configure_file(HashMeVersion.hpp.cmake "${CMAKE_CURRENT_SOURCE_DIR}/include/Hash
 add_subdirectory("examples/simple example")
 
 #############################################################
-# Optimization
+# Optimization settings
 if (WIN32)
 	if (MSVC)
 		target_compile_options("${PROJECT_NAME}" PRIVATE "/O2")
@@ -66,11 +63,11 @@ endif()
 
 ###########################################################
 # Macro for removing /RTC flag in VisualStudio (incompatible with /O2 optimization)
-macro(RemoveRTCFlagDebug)
+macro(RemoveRTCFlagDebug_VS)
 	string(REGEX REPLACE "/RTC[^ ]*" "" CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG}")
 endmacro()
 
-macro(RemoveRTCFlagRelease)
+macro(RemoveRTCFlagRelease_VS)
 	string(REGEX REPLACE "/RTC[^ ]*" "" CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE}")
 endmacro()
 
@@ -78,8 +75,8 @@ endmacro()
 # Add as many warnings as possible
 if (WIN32)
 	if (MSVC)
-		RemoveRTCFlagDebug()
-		RemoveRTCFlagRelease()
+		RemoveRTCFlagDebug_VS()
+		RemoveRTCFlagRelease_VS()
 		target_compile_options("${PROJECT_NAME}" PRIVATE "/W3")
 		#target_compile_options("${PROJECT_NAME}" PRIVATE "/WX")
 		#target_compile_options("${PROJECT_NAME}" PRIVATE "/wd4244")
