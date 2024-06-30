@@ -11,6 +11,7 @@ cmake -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -G "%TARGET_IDE%" -A "%ARCHITECTURE%" -S
 exit
 
 :HELP_TEXT
+echo.
 echo Usage:
 echo.
 echo generateVisualStudioProject.bat BUILD_TYPE VISUAL_STUDIO_VERSION ARCHITECTURE
