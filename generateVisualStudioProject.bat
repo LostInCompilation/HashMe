@@ -7,7 +7,7 @@ set "TARGET_IDE=%~2"
 set "ARCHITECTURE=%~3"
 
 REM cmake -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -G "%TARGET_IDE%" -A "%ARCHITECTURE%" -S . -B projects/ --fresh
-cmake --config "%BUILD_TYPE%" -G "%TARGET_IDE%" -A "%ARCHITECTURE%" -S . -B projects/ --fresh
+cmake -DCMAKE_CONFIGURATION_TYPES="%BUILD_TYPE%" -G "%TARGET_IDE%" -A "%ARCHITECTURE%" -S . -B projects/ --fresh
 
 exit
 
