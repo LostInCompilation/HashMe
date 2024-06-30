@@ -86,10 +86,6 @@ std::string GetVersionString();
 
 std::string GetDescription();
 
-// ***************************************************
-// Helper function to convert the hash to a string of hex values
-std::string HashToHexString(const std::vector<uint8_t>& hash);
-
 }
 
 // Namespace alias

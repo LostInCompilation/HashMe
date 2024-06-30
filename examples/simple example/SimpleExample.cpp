@@ -35,6 +35,7 @@ the following restrictions:
 #include <iostream>
 #include <string>
 #include <random>
+#include <assert.h>
 
 // Benchmarking lib
 #define PICOBENCH_IMPLEMENT
@@ -51,11 +52,125 @@ const uint64_t bigDataSize = 300 * 1024 * 1024; // 300MB
 std::vector<uint8_t>* bigData = nullptr; // Allocate on heap to prevent "Compiler out of heap space error" in VisualStudio
 
 const std::string testString = "123";
-const std::string longTestString = "12345678901234567890123456789012345678901234567890123456789012345"; // 65 chars
+//const std::string longTestString = "12345678901234567890123456789012345678901234567890123456789012345"; // 65 chars
 
 // Hash results for checking
-const std::string testStringHashSHA256 = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
-const std::string testStringHashMD5 = "202cb962ac59075b964b07152d234b70";
+const std::string testStringHashSHA256_expected = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
+const std::string testStringHashMD5_expected = "202cb962ac59075b964b07152d234b70";
+
+// Testing mode
+#define TEST_BIG_DATA // Use big data for test
+
+// ***************************************************
+// SHA256 software implementation
+double SHA256_Software_Speed = 0.0;
+std::string SHA256_Software_Hash = "";
+void SHA256_Software(picobench::state& s)
+{
+    std::vector<uint8_t> hashResult;
+    Hasher<SHA256, SOFTWARE> hasher;
+    
+    for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
+    {
+        s.start_timer();
+        
+        hasher.Reset();
+        
+#ifdef TEST_BIG_DATA
+        hasher.Update(*bigData);
+#else
+        hasher.Update(testString);
+        //hasher.Update(longTestString);
+#endif
+        hashResult = hasher.End();
+        
+        s.stop_timer();
+    }
+    
+    SHA256_Software_Hash = Utils::HashToHexString(hashResult);
+    SHA256_Software_Speed += static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
+}
+PICOBENCH(SHA256_Software).baseline();
+
+// ***************************************************
+// SHA256 hardware implementation
+double SHA256_Hardware_Speed = 0.0;
+std::string SHA256_Hardware_Hash = "";
+void SHA256_Hardware(picobench::state& s)
+{
+    std::vector<uint8_t> hashResult;
+    Hasher<SHA256, HARDWARE> hasher;
+    
+    for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
+    {
+        s.start_timer();
+        
+        hasher.Reset();
+        
+#ifdef TEST_BIG_DATA
+        hasher.Update(*bigData);
+#else
+        hasher.Update(testString);
+        //hasher.Update(longTestString);
+#endif
+        hashResult = hasher.End();
+        
+        s.stop_timer();
+    }
+    
+    SHA256_Hardware_Hash = Utils::HashToHexString(hashResult);
+    SHA256_Hardware_Speed += static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
+}
+PICOBENCH(SHA256_Hardware);
+
+// ***************************************************
+// MD5 software implementation
+double MD5_Software_Speed = 0.0;
+std::string MD5_Software_Hash = "";
+void MD5_Software(picobench::state& s)
+{
+    std::vector<uint8_t> hashResult;
+    Hasher<MD5, SOFTWARE> hasher;
+    
+    for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
+    {
+        s.start_timer();
+        
+        hasher.Reset();
+        
+#ifdef TEST_BIG_DATA
+        hasher.Update(*bigData);
+#else
+        hasher.Update(testString);
+        //hasher.Update(longTestString);
+#endif
+        hashResult = hasher.End();
+        
+        s.stop_timer();
+    }
+    
+    MD5_Software_Hash = Utils::HashToHexString(hashResult);
+    MD5_Software_Speed += static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
+}
+PICOBENCH(MD5_Software);
+
+// ***************************************************
+// Fill big data with random values
+void PrepareBigData()
+{
+    std::cout << "Generating random big data..." << std::flush;
+    
+    bigData = new std::vector<uint8_t>(bigDataSize);
+    
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution<unsigned int> dist(0, 255);
+        
+    for (uint64_t i = 0; i < bigDataSize; i++)
+        bigData->at(i) = dist(mt);
+    
+    std::cout << "Done! (" << bigDataSize / 1024 / 1024 << " MB)" << std::endl << std::endl;
+}
 
 // ***************************************************
 // Startup text
@@ -71,111 +186,28 @@ void PrintStartupHeader()
 }
 
 // ***************************************************
-// SHA256 software implementation
-void SHA256_Software(picobench::state& s)
+// Print measured speed and computed hashes
+void PrintSpeedAndHash()
 {
-    std::vector<uint8_t> hashResult;
-    Hasher<SHA256, SOFTWARE> hasher;
+    std::cout << "SHA256 (Software): " << std::fixed << std::setprecision(2) << SHA256_Software_Speed / 8.0 << " MB/s" << std::endl;
+    std::cout << "SHA256 (Software): " << SHA256_Software_Hash << std::endl << std::endl;
     
-    for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
-    {
-        s.start_timer();
-        
-        hasher.Reset();
-        hasher.Update(*bigData);
-        //hasher.Update(testString);
-        //hasher.Update(longTestString);
-        hashResult = hasher.End();
-        
-        s.stop_timer();
-    }
+    std::cout << "SHA256 (Hardware): " << std::fixed << std::setprecision(2) << SHA256_Hardware_Speed / 8.0 << " MB/s" << std::endl;
+    std::cout << "SHA256 (Hardware): " << SHA256_Hardware_Hash << std::endl << std::endl;
     
-    // Print hash
-    std::cout << "SHA256 (Software): " << HashToHexString(hashResult) << std::endl;
+    std::cout << "MD5 (Software): " << std::fixed << std::setprecision(2) << MD5_Software_Speed / 8.0 << " MB/s" << std::endl;
+    std::cout << "MD5 (Software): " << MD5_Software_Hash << std::endl << std::endl << std::endl;
     
-    // Print speed
-    const double speed = static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
-    std::cout << "Speed (Software): " << std::fixed << speed << " MB/s" << std::endl << std::endl;
+#ifndef TEST_BIG_DATA
+    // Check generated hashes for testString
+    assert(testStringHashSHA256_expected == SHA256_Software_Hash);
+    assert(testStringHashMD5_expected == MD5_Software_Hash);
+#endif
 }
-PICOBENCH(SHA256_Software).baseline();
 
 // ***************************************************
-// SHA256 hardware implementation
-void SHA256_Hardware(picobench::state& s)
-{
-    std::vector<uint8_t> hashResult;
-    Hasher<SHA256, HARDWARE> hasher;
-    
-    for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
-    {
-        s.start_timer();
-        
-        hasher.Reset();
-        hasher.Update(*bigData);
-        //hasher.Update(testString);
-        //hasher.Update(longTestString);
-        hashResult = hasher.End();
-        
-        s.stop_timer();
-    }
-    
-    // Print hash
-    std::cout << "SHA256 (Hardware): " << HashToHexString(hashResult) << std::endl;
-    
-    // Print speed
-    const double speed = static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
-    std::cout << "Speed (Hardware): " << std::fixed << speed << " MB/s" << std::endl << std::endl;
-}
-PICOBENCH(SHA256_Hardware);
-
-// ***************************************************
-// MD5 software implementation
-void MD5_Software(picobench::state& s)
-{
-    std::vector<uint8_t> hashResult;
-    Hasher<MD5, SOFTWARE> hasher;
-    
-    for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
-    {
-        s.start_timer();
-        
-        hasher.Reset();
-        hasher.Update(*bigData);
-        //hasher.Update(testString);
-        //hasher.Update(longTestString);
-        hashResult = hasher.End();
-        
-        s.stop_timer();
-    }
-    
-    // Print hash
-    std::cout << "MD5 (Software): " << HashToHexString(hashResult) << std::endl;
-    
-    // Print speed
-    const double speed = static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
-    std::cout << "Speed (Software): " << std::fixed << speed << " MB/s" << std::endl << std::endl;
-}
-PICOBENCH(MD5_Software);
-
-// ***************************************************
-// Fill big data with random values
-void PrepareBigData()
-{
-    std::cout << "Generating random big data...";
-    
-    bigData = new std::vector<uint8_t>(bigDataSize);
-    
-    std::random_device rd;
-    std::mt19937 mt(rd());
-    std::uniform_int_distribution<unsigned int> dist(0, 255);
-        
-    for (uint64_t i = 0; i < bigDataSize; i++)
-        bigData->at(i) = dist(mt);
-    
-    std::cout << "Done!" << std::endl << std::endl;
-}
-
-int main()
+// Print measured speed and computed hashes
+void PrintPredefInfo()
 {
     // ***************************************************
     // Architecture
@@ -198,32 +230,43 @@ int main()
     // ***************************************************
     // Check for SIMD
 #if defined(HASH_PREDEF_HW_SIMD_AVAILABLE)
-    std::cout << "SIMD detected" << std::endl;
+    std::cout << "SIMD detected: ";
 #endif
     
-    // ARM SIMD
-#if HASH_PREDEF_HW_SIMD_ARM
-    std::cout << "ARM SIMD detected. Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_HW_SIMD_ARM) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_HW_SIMD_ARM) << std::endl;
+#if HASH_PREDEF_HW_SIMD_ARM // ARM SIMD
+    std::cout << "ARM SIMD. Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_HW_SIMD_ARM) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_HW_SIMD_ARM) << std::endl;
+#elif HASH_PREDEF_HW_SIMD_X86 // X86 SIMD
+    std::cout << "x86 SIMD. Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_HW_SIMD_X86) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_HW_SIMD_X86) << std::endl;
 #endif
     
-    // X86 SIMD
-#if HASH_PREDEF_HW_SIMD_X86
-    std::cout << "x86 SIMD detected. Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_HW_SIMD_X86) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_HW_SIMD_X86) << std::endl;
-#endif
-    
+    std::cout << std::endl;
+}
+
+int main()
+{
+    // ***************************************************
     // Print startup header
     PrintStartupHeader();
+ 
+    // Print predef infos
+    PrintPredefInfo();
     
     // Fill big data with random values
+#ifdef TEST_BIG_DATA
     PrepareBigData();
+#endif
     
     // ***************************************************
     // Benchmark
+    std::cout << "Running benchmark..." << std::flush;
+    
     picobench::runner runner(0); // Use 0 as the RNG seed
     runner.set_default_samples(2);
     //runner.set_default_state_iterations({1, 2, 8, 32, 64});
     runner.set_default_state_iterations({1, 2, 4, 8});
     runner.run_benchmarks();
+    
+    std::cout << "Done!" << std::endl << std::endl;
     
     // ***************************************************
     // Generate report
@@ -232,6 +275,10 @@ int main()
     //report.to_text_concise(std::cout); // No iterations breakdown
     
     delete bigData;
+    
+    // ***************************************************
+    // Print speed and hashes
+    PrintSpeedAndHash();
     
     return 0;
 }

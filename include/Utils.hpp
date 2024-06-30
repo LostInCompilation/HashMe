@@ -63,6 +63,8 @@ constexpr inline void U32toU8(const uint32_t data, const bool reverseEndianness,
     }
 }
 
+std::string HashToHexString(const std::vector<uint8_t>& hash);
+
 }
 
 #endif /* Utils_hpp */

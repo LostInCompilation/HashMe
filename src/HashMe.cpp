@@ -59,13 +59,3 @@ std::string HashMe::GetDescription()
 {
     return HM_APP_CMAKE_DESCRIPTION;
 }
-
-std::string HashMe::HashToHexString(const std::vector<uint8_t>& hash)
-{
-    std::string result = "";
-    
-    for(auto i : hash)
-        result.append(std::format("{:x}", i));
-    
-    return result;
-}

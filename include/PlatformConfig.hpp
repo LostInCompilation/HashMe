@@ -35,7 +35,7 @@ the following restrictions:
 #define PlatformConfig_hpp
 
 // ***************************************************
-// Compiler
+// Compiler detection
 #if !defined(HASH_PREDEF_COMP_MSVC_AVAILABLE) && !defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) && !defined(HASH_PREDEF_COMP_GNUC_AVAIABLE)
 #error Currently only GCC, CLANG and MSVC compilers are tested. You can compile with a different compiler by commenting out this error.
 #endif

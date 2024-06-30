@@ -34,3 +34,15 @@ the following restrictions:
 #include "HashMe.hpp"
 
 using namespace HashMe;
+
+// ***************************************************
+// Helper function to convert the hash to a string of hex values with fixed size (two digits)
+std::string Utils::HashToHexString(const std::vector<uint8_t>& hash)
+{
+    std::string result = "";
+    
+    for(auto i : hash)
+        result.append(std::format("{:02x}", i));
+    
+    return result;
+}

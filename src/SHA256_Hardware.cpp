@@ -75,38 +75,32 @@ void Hasher<SHA256, HARDWARE>::Reset()
     Initialize();
 }
 
-// TODO: optimize mem allocs
+// Prepare data with padding
 uint64_t Hasher<SHA256, HARDWARE>::PrepareData(const uint8_t* const data, const uint64_t size, uint8_t** const preparedData)
 {
     const uint64_t dataSizeInBits = size << 3; // size * 8
-    const uint64_t padding = 512 - ((dataSizeInBits + 1 + 64) % 512);
-    const uint64_t paddingDiv8 = padding >> 3; // padding / 8
-    const uint64_t zeroPaddingArraySize = 1 + paddingDiv8 + 8;
+    const uint64_t paddingSize = (512ULL - ((dataSizeInBits + 1ULL + 64ULL) & 0x1FF)) >> 3; // (& 0x1FF) = (mod 512)
+    const uint64_t preparedDataSize = (1 + paddingSize + 8) + size; // paddingSize + size
     
-    // Add a 1 at beginning and append n zero bits
-    uint8_t* const zeroPadding = new uint8_t[zeroPaddingArraySize]{0}; // Zero fill
-    zeroPadding[0] = 0x80;
+    // Allocate memory for data and padding
+    *preparedData = new uint8_t[preparedDataSize]{0}; // Zero fill
     
-    // Append data size (uint64_t as big endian) to the end of zeroPadding array
-    const uint8_t index = 1 + paddingDiv8;
-    zeroPadding[index + 7] = dataSizeInBits;
-    zeroPadding[index + 6] = dataSizeInBits >> 8;
-    zeroPadding[index + 5] = dataSizeInBits >> 16;
-    zeroPadding[index + 4] = dataSizeInBits >> 24;
-    zeroPadding[index + 3] = dataSizeInBits >> 32;
-    zeroPadding[index + 2] = dataSizeInBits >> 40;
-    zeroPadding[index + 1] = dataSizeInBits >> 48;
-    zeroPadding[index] = dataSizeInBits >> 56;
-    
-    // Concatenate zeroPadding array and data
-    const uint64_t preparedDataSize = zeroPaddingArraySize + size;
-    *preparedData = new uint8_t[preparedDataSize];
-    
+    // Copy data to new array
     std::copy(data, data + size, *preparedData);
-    std::copy(zeroPadding, zeroPadding + zeroPaddingArraySize, *preparedData + size);
     
-    // Delete zeroPadding array
-    delete[] zeroPadding;
+    // Append padding after data. Add a 1 at beginning and append n zero bits
+    (*preparedData)[size] = 0x80;
+    
+    // Append data size (uint64_t as big endian) to the end of array
+    const uint64_t index = 1ULL + paddingSize + size;
+    (*preparedData)[index + 7] = dataSizeInBits;
+    (*preparedData)[index + 6] = dataSizeInBits >> 8;
+    (*preparedData)[index + 5] = dataSizeInBits >> 16;
+    (*preparedData)[index + 4] = dataSizeInBits >> 24;
+    (*preparedData)[index + 3] = dataSizeInBits >> 32;
+    (*preparedData)[index + 2] = dataSizeInBits >> 40;
+    (*preparedData)[index + 1] = dataSizeInBits >> 48;
+    (*preparedData)[index] = dataSizeInBits >> 56;
     
     return preparedDataSize;
 }
