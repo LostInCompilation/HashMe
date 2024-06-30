@@ -14,6 +14,7 @@ exit
 echo Usage:
 echo.
 echo generateVisualStudioProject.bat BUILD_TYPE VISUAL_STUDIO_VERSION ARCHITECTURE
+echo.
 echo     BUILD_TYPE: Debug, Release
 echo     VISUAL_STUDIO_VERSION: "Visual Studio 17 2022" or "Visual Studio 16 2019" or older...
-echo	 ARCHITECTURE: Win32 x64 ARM ARM64
+echo     ARCHITECTURE: Win32 x64 ARM ARM64
