@@ -38,9 +38,21 @@ else()
 endif()
 
 ###########################################################
+# Macro for removing /RTC flag in VisualStudio (incompatible with /O2 optimization)
+macro(RemoveRTCFlagDebug)
+	string(REGEX REPLACE "/RTC[^ ]*" "" CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG}")
+endmacro()
+
+macro(RemoveRTCFlagRelease)
+	string(REGEX REPLACE "/RTC[^ ]*" "" CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE}")
+endmacro()
+
+###########################################################
 # Add as many warnings as possible
 if (WIN32)
 	if (MSVC)
+		RemoveRTCFlagDebug()
+		RemoveRTCFlagRelease()
 		target_compile_options("${PROJECT_NAME}" PRIVATE "/W3")
 		target_compile_options("${PROJECT_NAME}" PRIVATE "/WX")
 		#target_compile_options("${PROJECT_NAME}" PRIVATE "/wd4244")
