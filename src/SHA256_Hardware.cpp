@@ -93,14 +93,14 @@ uint64_t Hasher<SHA256, HARDWARE>::PrepareData(const uint8_t* const data, const 
     
     // Append data size (uint64_t as big endian) to the end of array
     const uint64_t index = 1ULL + paddingSize + size;
-    (*preparedData)[index + 7] = dataSizeInBits;
-    (*preparedData)[index + 6] = dataSizeInBits >> 8;
-    (*preparedData)[index + 5] = dataSizeInBits >> 16;
-    (*preparedData)[index + 4] = dataSizeInBits >> 24;
-    (*preparedData)[index + 3] = dataSizeInBits >> 32;
-    (*preparedData)[index + 2] = dataSizeInBits >> 40;
-    (*preparedData)[index + 1] = dataSizeInBits >> 48;
-    (*preparedData)[index] = dataSizeInBits >> 56;
+    (*preparedData)[index + 7] = static_cast<uint8_t>(dataSizeInBits); // Unsigned integer cast discards unused bits
+    (*preparedData)[index + 6] = static_cast<uint8_t>(dataSizeInBits >> 8);
+    (*preparedData)[index + 5] = static_cast<uint8_t>(dataSizeInBits >> 16);
+    (*preparedData)[index + 4] = static_cast<uint8_t>(dataSizeInBits >> 24);
+    (*preparedData)[index + 3] = static_cast<uint8_t>(dataSizeInBits >> 32);
+    (*preparedData)[index + 2] = static_cast<uint8_t>(dataSizeInBits >> 40);
+    (*preparedData)[index + 1] = static_cast<uint8_t>(dataSizeInBits >> 48);
+    (*preparedData)[index] = static_cast<uint8_t>(dataSizeInBits >> 56);
     
     return preparedDataSize;
 }

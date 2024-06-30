@@ -186,7 +186,7 @@ void Hasher<SHA256, SOFTWARE>::Update(const uint8_t* const data, const uint64_t 
         throw std::invalid_argument("Data size cannot be zero.");
     
     // Copy data size to use it as our counter
-    const uint64_t lastBlockSize = size & (SHA256_BLOCK_LENGTH - 1); // size % SHA256_BLOCK_LENGTH
+    const uint32_t lastBlockSize = size & (SHA256_BLOCK_LENGTH - 1); // size % SHA256_BLOCK_LENGTH
     uint64_t dataIndex = 0;
     
     // Fill buffer with SHA256_BLOCK_LENGTH bytes

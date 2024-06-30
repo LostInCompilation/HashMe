@@ -59,7 +59,7 @@ private:
     {
         uint32_t    state[8] = {0};
         
-        uint8_t     bufferSize = 0;
+        uint32_t    bufferSize = 0;
         uint64_t    numOfBits = 0;
         uint8_t     buffer[SHA256_BLOCK_LENGTH] = {0};
     };

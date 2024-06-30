@@ -41,7 +41,6 @@ add_library("${PROJECT_NAME}"
 
 # The projects include directories
 target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-#target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/predef")
 
 ###########################################################
 # Project versioning

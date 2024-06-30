@@ -1,6 +1,8 @@
 @echo off
 
 IF "%~1" == "" GOTO HELP_TEXT
+IF "%~2" == "" GOTO HELP_TEXT
+IF "%~3" == "" GOTO HELP_TEXT
 
 set "BUILD_TYPE=%~1"
 set "TARGET_IDE=%~2"
