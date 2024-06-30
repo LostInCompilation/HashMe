@@ -29,7 +29,7 @@
 ## Description
 **Library is currently WIP! Will be updated frequently.**
 
-A simple to use, fast and modern C++20 Hash library which supports **hardware accelerated** algorithms (SIMD intrinsics) for **x86 and ARMv8 (like AppleSilicon)**. See X for performance. The static library provides very easy integration in your projects and ultra high speeds for the most common hash algorithms like **MD5, MD6, SHA0, SHA1, SHA2 (SHA224, SHA256, SHA384, SHA512), SHA3 (SHA3-224, SHA3-256, SHA3-384, SHA3-512), CRC16, CRC32, CRC64, CRC128** and others. See [Supported hash algorithms](#supported-hash-algorithms) for details.
+A simple to use, fast and modern C++20 Hash library which supports **hardware accelerated** algorithms (SIMD intrinsics) for **x86 and ARMv8 (like AppleSilicon)**. See [Performance and Benchmarks](#performance-and-benchmarks) for speeds. The static library provides very easy integration in your projects and ultra high speeds for the most common hash algorithms like **MD5, MD6, SHA0, SHA1, SHA2 (SHA224, SHA256, SHA384, SHA512), SHA3 (SHA3-224, SHA3-256, SHA3-384, SHA3-512), CRC16, CRC32, CRC64, CRC128** and others. See [Supported hash algorithms](#supported-hash-algorithms) for details.
 CMake build environment is supported, as well as generating projects for VisualStudio or Xcode.
 
 STREAMING FOR LARGE FILES
