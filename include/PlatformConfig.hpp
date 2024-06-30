@@ -47,23 +47,23 @@ the following restrictions:
 #elif defined(HASH_PREDEF_ENDIAN_LITTLE_BYTE_AVAILABLE)
     #define HM_LITTLE_ENDIAN
 #elif define(HASH_PREDEF_ENDIAN_BIG_WORD_AVAILABLE) || defined(HASH_PREDEF_ENDIAN_LITTLE_WORD_AVAILABLE)
-    #error Middle endian is not supported.
+    #error Middle endianness hardware is not supported.
 #endif
 
 // ***************************************************
 // SIMD
 #ifdef HASH_PREDEF_HW_SIMD_AVAILABLE
     #if HASH_PREDEF_HW_SIMD_ARM
-        #if (HASH_PREDEF_HW_SIMD_ARM >= HASH_PREDEF_HW_SIMD_ARM_NEON_VERSION) // ARM NEON available (ARMv8)
+        #if (HASH_PREDEF_HW_SIMD_ARM >= HASH_PREDEF_HW_SIMD_ARM_NEON_VERSION) // ARM NEON available (ARMv8 and newer)
             #define HM_SIMD_ARM
         #endif
     #elif HASH_PREDEF_HW_SIMD_X86
-        #error Implement SIMD for x86
+        #pragma message("x86 SIMD is not yet implemented.")
     #elif HASH_PREDEF_HW_SIMD_X86_AMD
-        #error Implement SIMD for x86 AMD
+        #pragma message("x86 AMD specific SIMD is not yet implemented.")
     #endif
 #else
-#warning Hardware acceleration (SIMD) is not available on this platform. Did you forget a compiler switch?
+#pragma message("Hardware acceleration (SIMD) is not available on this platform. Did you forget a compiler switch?")
 #endif
 
 #endif /* PlatformConfig_hpp */
