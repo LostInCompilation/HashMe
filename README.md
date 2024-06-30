@@ -11,7 +11,10 @@
 ## Contents
 - [Description](#description)
     - [Supported hash algorithms](#supported-hash-algorithms)
-    - [Additional features](#additional-features)
+    - [Additional algorithms](#additional-algorithms)
+    - [Performance and Benchmarks](#performance-and-benchmarks)
+        - [ARMv8 (M1 Pro AppleSilicon)](#armv8-m1-pro-applesilicon)
+        - [x86_64 (Intel)](#x86-64-intel)
 - [Getting the library](#getting-the-library)
 - [Compiling](#compiling)
     - [CMake](#cmake)
@@ -24,23 +27,41 @@
 *See also: [License (zlib)](LICENSE.md)*
 
 ## Description
-Currently WIP!
+**Library is currently WIP! Will be updated frequently.**
 
-Symbols: ❌ ⚠️ ✅
-
-A simple to use, modern and free C++20 Hash library which supports **hardware accelerated** (SIMD intrinsics) algorithms for **x86 and ARMv8 (like AppleSilicon)**. The static library provides very easy integration in your projects and ultra high speeds for the most common hash algorithms like MD5, SHA1, SHA2, SHA256, SHA512 and many more.
+A simple to use, fast and modern C++20 Hash library which supports **hardware accelerated** algorithms (SIMD intrinsics) for **x86 and ARMv8 (like AppleSilicon)**. See X for performance. The static library provides very easy integration in your projects and ultra high speeds for the most common hash algorithms like **MD5, MD6, SHA0, SHA1, SHA2 (SHA224, SHA256, SHA384, SHA512), SHA3 (SHA3-224, SHA3-256, SHA3-384, SHA3-512), CRC16, CRC32, CRC64, CRC128** and others. See [Supported hash algorithms](#supported-hash-algorithms) for details.
 CMake build environment is supported, as well as generating projects for VisualStudio or Xcode.
 
 STREAMING FOR LARGE FILES
 
 ### Supported hash algorithms
 The following hash algorithms are supported:
-Algorithm | Supported | Hardware acceleration |
+Algorithm | Supported | Hardware acceleration (WIP) |
 | -- | --------- | --------- |
-| MD5 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
+| MD5 | ✅ Yes | ⚠️ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
+| MD6 | ⚠️ WIP | ⚠️ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
+| SHA256 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
+| SHA512 | ⚠️ WIP | ⚠️ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
+| SHA3-512 | ⚠️ WIP | ⚠️ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
 
-### Additional features
-TODO - BASE64
+*⚠️ = Work in progress*
+*❌ = Not supported*
+
+### Additional algorithms
+TODO Base64
+
+### Performance and Benchmarks
+#### ARMv8 (M1 Pro AppleSilicon)
+Algorithm      |   Speed (MB/s)
+---------------|--------:
+SHA256 Software | 204.20 MB/s
+SHA256 Hardware (SIMD) | 1608.46 MB/s
+MD5 Software | 535.63 MB/s
+
+*Apple Clang, Release build, -O3 optimization*
+
+#### x86_64 (Intel)
+TODO
 
 ## Getting the library
 To download the library simply clone the repository:
