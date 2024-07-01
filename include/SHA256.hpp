@@ -84,7 +84,7 @@ private:
     };
     
     // Our context
-    Context*     m_Context = nullptr;
+    std::unique_ptr<Context> m_Context;
 
     // Methods
     virtual void Initialize() override;
@@ -92,7 +92,7 @@ private:
     
 public:
     Hasher();
-    ~Hasher();
+    ~Hasher() = default;
     
     // Allow copy but no assign
     Hasher(const Hasher& other);

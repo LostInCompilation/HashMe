@@ -90,7 +90,7 @@ void SHA256_Software(picobench::state& s)
     SHA256_Software_Hash = Utils::HashToHexString(hashResult);
     SHA256_Software_Speed += static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
 }
-PICOBENCH(SHA256_Software).baseline();
+PICOBENCH(SHA256_Software);
 
 // ***************************************************
 // SHA256 hardware implementation
@@ -121,7 +121,7 @@ void SHA256_Hardware(picobench::state& s)
     SHA256_Hardware_Hash = Utils::HashToHexString(hashResult);
     SHA256_Hardware_Speed += static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
 }
-PICOBENCH(SHA256_Hardware);
+PICOBENCH(SHA256_Hardware).baseline();
 
 // ***************************************************
 // MD5 software implementation

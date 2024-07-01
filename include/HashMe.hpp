@@ -37,6 +37,7 @@ the following restrictions:
 // ***************************************************
 // System includes
 #include <cstdint>
+#include <memory>
 #include <array>
 #include <vector>
 #include <format>

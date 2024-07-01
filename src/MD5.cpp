@@ -91,19 +91,14 @@ inline static constexpr void II(uint32_t& a, const uint32_t b, const uint32_t c,
 
 Hasher<MD5, SOFTWARE>::Hasher()
 {
-    m_Context = new Context;
+    m_Context = std::make_unique<Context>();
     
     Initialize();
 }
 
-Hasher<MD5, SOFTWARE>::~Hasher()
-{
-    delete m_Context;
-}
-
 Hasher<MD5, SOFTWARE>::Hasher(const Hasher& other)
 {
-    m_Context = new Context;
+    m_Context = std::make_unique<Context>();
     
     std::copy(other.m_Context->count, other.m_Context->count + 2, m_Context->count);
     std::copy(other.m_Context->state, other.m_Context->state + 4, m_Context->state);
@@ -275,7 +270,7 @@ std::vector<uint8_t> Hasher<MD5, SOFTWARE>::End()
     Utils::U32toU8(m_Context->count[0], false, &numOfBits[0]);
     Utils::U32toU8(m_Context->count[1], false, &numOfBits[4]);
     
-    uint32_t index = (m_Context->count[0] >> 3) & 0x3F; // mod 64
+    uint32_t index = (m_Context->count[0] >> 3) & 0x3F; // Modulo 64
     uint32_t paddingSize = (index < 56) ? (56 - index) : (120 - index);
     
     Update(PADDING.data(), paddingSize);

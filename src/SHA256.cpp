@@ -45,19 +45,14 @@ inline static constexpr uint32_t Choose(const uint32_t x, const uint32_t y, cons
 
 Hasher<SHA256, SOFTWARE>::Hasher()
 {
-    m_Context = new Context;
+    m_Context = std::make_unique<Context>();
     
     Initialize();
 }
 
-Hasher<SHA256, SOFTWARE>::~Hasher()
-{
-    delete m_Context;
-}
-
 Hasher<SHA256, SOFTWARE>::Hasher(const Hasher& other)
 {
-    m_Context = new Context;
+    m_Context = std::make_unique<Context>();
     
     m_Context->bufferSize = other.m_Context->bufferSize;
     m_Context->numOfBits = other.m_Context->numOfBits;
