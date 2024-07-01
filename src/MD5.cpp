@@ -233,8 +233,8 @@ void Hasher<MD5, SOFTWARE>::Update(const uint8_t* const data, const uint64_t siz
     uint32_t index = (m_Context->count[0] >> 3) & (MD5_BLOCK_LENGTH - 1); // mod MD5_BLOCK_LENGTH
     const uint32_t partialBlockSize = MD5_BLOCK_LENGTH - index;
     
-    m_Context->count[0] += (size << 3);
-    m_Context->count[1] += (size >> 29);
+    m_Context->count[0] += static_cast<uint32_t>(size << 3);
+    m_Context->count[1] += static_cast<uint32_t>(size >> 29);
     
     if (m_Context->count[0] < (size << 3))
         m_Context->count[1]++;

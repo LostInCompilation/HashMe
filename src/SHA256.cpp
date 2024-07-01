@@ -241,7 +241,7 @@ std::vector<uint8_t> Hasher<SHA256, SOFTWARE>::End()
     Transform(m_Context->buffer);
     
     std::vector<uint8_t> hash(32); // 256 bit hash
-    for(uint8_t i = 0; i < 8; i++)
+    for(uint32_t i = 0; i < 8; i++)
     {
 #ifdef HM_LITTLE_ENDIAN
         Utils::U32toU8(m_Context->state[i], true, &hash[i << 2]); // Transform SHA big endian to host little endian
