@@ -1,4 +1,4 @@
-# HashMe - Hardware accelerated hash library for C++ (SIMD intrinsics) - WIP
+# HashMe - Hardware accelerated hash library for C++ (SIMD intrinsics)
 
 ![Version](https://img.shields.io/badge/Version-V0.1-brightgreen?style=flat&&logo=framework) ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20-blue?style=flat&&logo=buffer) ![CPU](https://img.shields.io/badge/CPU-x86%20%7C%20ARMv8-red?style=flat&&logo=qmk) ![CPP](https://img.shields.io/badge/Language-C++20-orange?style=flat&&logo=C%2b%2b)
 
@@ -54,9 +54,9 @@ TODO Base64
 #### ARMv8 (M1 Pro AppleSilicon)
 Algorithm      |   Speed (MB/s)
 ---------------|--------:
-SHA256 Software | 204.20 MB/s
-SHA256 Hardware (SIMD) | 1608.46 MB/s
-MD5 Software | 535.63 MB/s
+SHA256 Software | 217.76 MB/s
+SHA256 Hardware (SIMD) | 1644.86 MB/s
+MD5 Software | 538.12 MB/s
 
 *Apple Clang, Release build, -O3 optimization*
 

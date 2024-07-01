@@ -64,6 +64,7 @@ the following restrictions:
 // ***************************************************
 // Lib settings
 #define HM_ENABLE_NAMESPACE_ALIAS // Enable the "HM" namespace alias additionally to "HashMe"
+//#define HM_CLEANUP_TMP_MEMORY_AFTER_HASHING_FOR_SECURITY // Sets temporary variables and hash states to zero after hash calculation for better security
 
 namespace HashMe
 {

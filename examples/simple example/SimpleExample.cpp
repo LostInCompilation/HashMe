@@ -52,7 +52,7 @@ const uint64_t bigDataSize = 300 * 1024 * 1024; // 300MB
 std::vector<uint8_t>* bigData = nullptr; // Allocate on heap to prevent "Compiler out of heap space error" in VisualStudio
 
 const std::string testString = "123";
-//const std::string longTestString = "12345678901234567890123456789012345678901234567890123456789012345"; // 65 chars
+//const std::string testString = "12345678901234567890123456789012345678901234567890123456789012345"; // 65 chars
 
 // Hash results for checking
 const std::string testStringHashSHA256_expected = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
@@ -243,7 +243,7 @@ void PrintPredefInfo()
 }
 
 int main()
-{
+{    
     // ***************************************************
     // Print startup header
     PrintStartupHeader();

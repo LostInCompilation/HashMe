@@ -52,9 +52,20 @@ template <>
 class Hasher<MD5, SOFTWARE> : public HasherBase
 {
 private:
+    // ***************************************************
     // Constants
-    static const uint8_t MD5_BLOCK_LENGTH = 64; // TODO: check if used everywhere
+    inline static constexpr uint8_t MD5_BLOCK_LENGTH = 64; // TODO: check if used everywhere
+    inline static constexpr std::array<uint32_t, 4> INITIAL_HASH_VALUES = {
+        0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476
+    };
+    inline static constexpr std::array<uint8_t, 64> PADDING = {
+      0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
     
+    // ***************************************************
+    // MD5 context
     struct Context
     {
         uint32_t    state[4] = {0}; // ABCD

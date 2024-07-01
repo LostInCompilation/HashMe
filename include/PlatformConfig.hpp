@@ -63,7 +63,7 @@ the following restrictions:
         #pragma message("x86 AMD specific SIMD is not yet implemented.")
     #endif
 #else
-#pragma message("Hardware acceleration (SIMD) is not available on this platform. Did you forget a compiler switch?")
+#pragma message("Hardware acceleration (SIMD) is not available on this platform.")
 #endif
 
 #endif /* PlatformConfig_hpp */

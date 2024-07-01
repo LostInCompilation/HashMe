@@ -35,61 +35,55 @@ the following restrictions:
 
 using namespace HashMe;
 
-// Constants
-constexpr std::array<uint32_t, 4> INITIAL_HASH_VALUES = {
-    0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476
-};
-
-constexpr std::array<uint8_t, 64> PADDING = {
-  0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
+// ***************************************************
 // MD5 transform constants
-constexpr uint32_t S11 = 7;
-constexpr uint32_t S12 = 12;
-constexpr uint32_t S13 = 17;
-constexpr uint32_t S14 = 22;
-constexpr uint32_t S21 = 5;
-constexpr uint32_t S22 = 9;
-constexpr uint32_t S23 = 14;
-constexpr uint32_t S24 = 20;
-constexpr uint32_t S31 = 4;
-constexpr uint32_t S32 = 11;
-constexpr uint32_t S33 = 16;
-constexpr uint32_t S34 = 23;
-constexpr uint32_t S41 = 6;
-constexpr uint32_t S42 = 10;
-constexpr uint32_t S43 = 15;
-constexpr uint32_t S44 = 21;
+inline static constexpr uint32_t S11 = 7;
+inline static constexpr uint32_t S12 = 12;
+inline static constexpr uint32_t S13 = 17;
+inline static constexpr uint32_t S14 = 22;
 
-// Basic MD5 functions
-constexpr inline uint32_t F(const uint32_t x, const uint32_t y, const uint32_t z) { return (x & y) | (~x & z); }
-constexpr inline uint32_t G(const uint32_t x, const uint32_t y, const uint32_t z) { return (x & z) | (y & ~z); }
-constexpr inline uint32_t H(const uint32_t x, const uint32_t y, const uint32_t z) { return (x ^ y ^ z); }
-constexpr inline uint32_t I(const uint32_t x, const uint32_t y, const uint32_t z) { return y ^ (x | ~z); }
+inline static constexpr uint32_t S21 = 5;
+inline static constexpr uint32_t S22 = 9;
+inline static constexpr uint32_t S23 = 14;
+inline static constexpr uint32_t S24 = 20;
+
+inline static constexpr uint32_t S31 = 4;
+inline static constexpr uint32_t S32 = 11;
+inline static constexpr uint32_t S33 = 16;
+inline static constexpr uint32_t S34 = 23;
+
+inline static constexpr uint32_t S41 = 6;
+inline static constexpr uint32_t S42 = 10;
+inline static constexpr uint32_t S43 = 15;
+inline static constexpr uint32_t S44 = 21;
+
+// ***************************************************
+// Basic MD5 functions. Inline is implied by constexpr, but we leave it for convenience
+inline static constexpr uint32_t F(const uint32_t x, const uint32_t y, const uint32_t z) { return (x & y) | (~x & z); }
+inline static constexpr uint32_t G(const uint32_t x, const uint32_t y, const uint32_t z) { return (x & z) | (y & ~z); }
+inline static constexpr uint32_t H(const uint32_t x, const uint32_t y, const uint32_t z) { return (x ^ y ^ z); }
+inline static constexpr uint32_t I(const uint32_t x, const uint32_t y, const uint32_t z) { return y ^ (x | ~z); }
 
 // Transformations for rounds 1-4
-constexpr inline void FF(uint32_t& a, const uint32_t b, const uint32_t c, const uint32_t d,
+inline static constexpr void FF(uint32_t& a, const uint32_t b, const uint32_t c, const uint32_t d,
                       const uint32_t x, const uint32_t s, const uint32_t ac)
 {
     a = std::rotl(a + F(b, c, d) + x + ac, s) + b;
 }
 
-constexpr inline void GG(uint32_t& a, const uint32_t b, const uint32_t c, const uint32_t d,
+inline static constexpr void GG(uint32_t& a, const uint32_t b, const uint32_t c, const uint32_t d,
                       const uint32_t x, const uint32_t s, const uint32_t ac)
 {
     a = std::rotl(a + G(b, c, d) + x + ac, s) + b;
 }
 
-constexpr inline void HH(uint32_t& a, const uint32_t b, const uint32_t c, const uint32_t d,
+inline static constexpr void HH(uint32_t& a, const uint32_t b, const uint32_t c, const uint32_t d,
                       const uint32_t x, const uint32_t s, const uint32_t ac)
 {
     a = std::rotl(a + H(b, c, d) + x + ac, s) + b;
 }
 
-constexpr inline void II(uint32_t& a, const uint32_t b, const uint32_t c, const uint32_t d,
+inline static constexpr void II(uint32_t& a, const uint32_t b, const uint32_t c, const uint32_t d,
                       const uint32_t x, const uint32_t s, const uint32_t ac)
 {
     a = std::rotl(a + I(b, c, d) + x + ac, s) + b;
@@ -128,6 +122,9 @@ void Hasher<MD5, SOFTWARE>::Reset()
     
     m_Context->count[0] = 0;
     m_Context->count[1] = 0;
+    
+    // Zero out buffer
+    std::memset(m_Context->buffer, 0, MD5_BLOCK_LENGTH);
 }
 
 void Hasher<MD5, SOFTWARE>::Transform(const uint8_t block[MD5_BLOCK_LENGTH])
@@ -140,8 +137,8 @@ void Hasher<MD5, SOFTWARE>::Transform(const uint8_t block[MD5_BLOCK_LENGTH])
     
     for(uint32_t i = 0; i < (MD5_BLOCK_LENGTH >> 2); i++)
         x[i] = Utils::U8toU32(&block[(i << 2)], false);
-        
-    /* Round 1 */
+    
+    // Round 1
     FF (a, b, c, d, x[ 0], S11, 0xd76aa478); /* 1 */
     FF (d, a, b, c, x[ 1], S12, 0xe8c7b756); /* 2 */
     FF (c, d, a, b, x[ 2], S13, 0x242070db); /* 3 */
@@ -159,7 +156,7 @@ void Hasher<MD5, SOFTWARE>::Transform(const uint8_t block[MD5_BLOCK_LENGTH])
     FF (c, d, a, b, x[14], S13, 0xa679438e); /* 15 */
     FF (b, c, d, a, x[15], S14, 0x49b40821); /* 16 */
    
-    /* Round 2 */
+    // Round 2
     GG (a, b, c, d, x[ 1], S21, 0xf61e2562); /* 17 */
     GG (d, a, b, c, x[ 6], S22, 0xc040b340); /* 18 */
     GG (c, d, a, b, x[11], S23, 0x265e5a51); /* 19 */
@@ -177,7 +174,7 @@ void Hasher<MD5, SOFTWARE>::Transform(const uint8_t block[MD5_BLOCK_LENGTH])
     GG (c, d, a, b, x[ 7], S23, 0x676f02d9); /* 31 */
     GG (b, c, d, a, x[12], S24, 0x8d2a4c8a); /* 32 */
    
-    /* Round 3 */
+    // Round 3
     HH (a, b, c, d, x[ 5], S31, 0xfffa3942); /* 33 */
     HH (d, a, b, c, x[ 8], S32, 0x8771f681); /* 34 */
     HH (c, d, a, b, x[11], S33, 0x6d9d6122); /* 35 */
@@ -195,7 +192,7 @@ void Hasher<MD5, SOFTWARE>::Transform(const uint8_t block[MD5_BLOCK_LENGTH])
     HH (c, d, a, b, x[15], S33, 0x1fa27cf8); /* 47 */
     HH (b, c, d, a, x[ 2], S34, 0xc4ac5665); /* 48 */
    
-    /* Round 4 */
+    // Round 4
     II (a, b, c, d, x[ 0], S41, 0xf4292244); /* 49 */
     II (d, a, b, c, x[ 7], S42, 0x432aff97); /* 50 */
     II (c, d, a, b, x[14], S43, 0xab9423a7); /* 51 */
@@ -220,7 +217,9 @@ void Hasher<MD5, SOFTWARE>::Transform(const uint8_t block[MD5_BLOCK_LENGTH])
     m_Context->state[3] += d;
     
     // Cleanup sensitive data for security
-    //std::memset(x, 0, MD5_BLOCK_LENGTH);
+#ifdef HM_CLEANUP_TMP_MEMORY_AFTER_HASHING_FOR_SECURITY
+    std::memset(x, 0, MD5_BLOCK_LENGTH);
+#endif
 }
 
 void Hasher<MD5, SOFTWARE>::Update(const uint8_t* const data, const uint64_t size)
@@ -231,30 +230,28 @@ void Hasher<MD5, SOFTWARE>::Update(const uint8_t* const data, const uint64_t siz
     if(size == 0)
         throw std::invalid_argument("Data size cannot be zero.");
     
-    uint64_t i;
     uint32_t index = (m_Context->count[0] >> 3) & (MD5_BLOCK_LENGTH - 1); // mod MD5_BLOCK_LENGTH
-    const uint32_t partSize = MD5_BLOCK_LENGTH - index;
+    const uint32_t partialBlockSize = MD5_BLOCK_LENGTH - index;
     
-    if ((m_Context->count[0] += (size << 3ULL)) < (size << 3ULL))
+    m_Context->count[0] += (size << 3);
+    m_Context->count[1] += (size >> 29);
+    
+    if (m_Context->count[0] < (size << 3))
         m_Context->count[1]++;
     
-    m_Context->count[1] += (size >> 29ULL);
+    uint64_t i = 0;
     
     // Transform as often as possible
-    if(size >= partSize)
+    if(size >= partialBlockSize)
     {
-        std::memcpy(&m_Context->buffer[index], data, partSize);
+        std::memcpy(&m_Context->buffer[index], data, partialBlockSize);
         
         Transform(m_Context->buffer);
         
-        for(i = partSize; i + MD5_BLOCK_LENGTH <= size; i += MD5_BLOCK_LENGTH)
+        for(i = partialBlockSize; i + MD5_BLOCK_LENGTH <= size; i += MD5_BLOCK_LENGTH)
             Transform(&data[i]);
         
         index = 0;
-    }
-    else
-    {
-        i = 0;
     }
     
     // Remaining input data
@@ -278,7 +275,6 @@ std::vector<uint8_t> Hasher<MD5, SOFTWARE>::End()
     Utils::U32toU8(m_Context->count[0], false, &numOfBits[0]);
     Utils::U32toU8(m_Context->count[1], false, &numOfBits[4]);
     
-    // Pad out to 56 mod 64
     uint32_t index = (m_Context->count[0] >> 3) & 0x3F; // mod 64
     uint32_t paddingSize = (index < 56) ? (56 - index) : (120 - index);
     
@@ -293,7 +289,9 @@ std::vector<uint8_t> Hasher<MD5, SOFTWARE>::End()
         Utils::U32toU8(m_Context->state[i], false, &hash.data()[(i << 2)]);
     
     // Cleanup sensitive data for security
-    //std::memset(m_Context, 0, sizeof(Context));
+#ifdef HM_CLEANUP_TMP_MEMORY_AFTER_HASHING_FOR_SECURITY
+    std::memset(m_Context, 0, sizeof(Context));
+#endif
     
     return hash;
 }
