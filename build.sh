@@ -4,11 +4,11 @@
 mkdir -p build
 cd build/
 
-# Build project with 8 threads
-make -j8
+# Build project with 4 threads
+#make -j4
 
-# Build project with CMake
-#cmake --build . --target MyExe
+# Build project with CMake (4 threads)
+cmake --build . -j4
 
 # Go back to project root
 cd ..

@@ -228,14 +228,14 @@ std::vector<uint8_t> Hasher<SHA256, SOFTWARE>::End()
     // Append message length in bits
     m_Context->numOfBits += (m_Context->bufferSize << 3); // bufferSize * 8
     
-    m_Context->buffer[63] = m_Context->numOfBits;
-    m_Context->buffer[62] = m_Context->numOfBits >> 8;
-    m_Context->buffer[61] = m_Context->numOfBits >> 16;
-    m_Context->buffer[60] = m_Context->numOfBits >> 24;
-    m_Context->buffer[59] = m_Context->numOfBits >> 32;
-    m_Context->buffer[58] = m_Context->numOfBits >> 40;
-    m_Context->buffer[57] = m_Context->numOfBits >> 48;
-    m_Context->buffer[56] = m_Context->numOfBits >> 56;
+    m_Context->buffer[63] = static_cast<uint8_t>(m_Context->numOfBits);
+    m_Context->buffer[62] = static_cast<uint8_t>(m_Context->numOfBits >> 8);
+    m_Context->buffer[61] = static_cast<uint8_t>(m_Context->numOfBits >> 16);
+    m_Context->buffer[60] = static_cast<uint8_t>(m_Context->numOfBits >> 24);
+    m_Context->buffer[59] = static_cast<uint8_t>(m_Context->numOfBits >> 32);
+    m_Context->buffer[58] = static_cast<uint8_t>(m_Context->numOfBits >> 40);
+    m_Context->buffer[57] = static_cast<uint8_t>(m_Context->numOfBits >> 48);
+    m_Context->buffer[56] = static_cast<uint8_t>(m_Context->numOfBits >> 56);
     
     // Transform
     Transform(m_Context->buffer);
