@@ -36,7 +36,7 @@ the following restrictions:
 
 // ***************************************************
 // Compiler detection
-#if !defined(HASH_PREDEF_COMP_MSVC_AVAILABLE) && !defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) && !defined(HASH_PREDEF_COMP_GNUC_AVAIABLE)
+#if !defined(HASH_PREDEF_COMP_MSVC_AVAILABLE) && !defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) && !defined(HASH_PREDEF_COMP_GNUC_AVAILABLE)
 #error Currently only GCC, CLANG and MSVC compilers are tested. You can compile with a different compiler by commenting out this error.
 #endif
 

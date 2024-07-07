@@ -5,18 +5,31 @@
 macro(_PRINT_SUMMARY)
 
 message("################################################################################
-#                                  Build type                                  #
+#                                   General                                    #
 ################################################################################")
 colorFormatText(BOLD COLOR BLUE "Build type:")
-message("${COLOR_FORMATTED_TEXT} ${CMAKE_BUILD_TYPE}\n")
+message("${COLOR_FORMATTED_TEXT} ${CMAKE_BUILD_TYPE}")
+
+colorFormatText(BOLD COLOR BLUE "Compiler:")
+message("${COLOR_FORMATTED_TEXT}   ${CMAKE_CXX_COMPILER_ID}\n")
+
+#colorFormatText(BOLD COLOR BLUE "Build type:")
+#message("${COLOR_FORMATTED_TEXT} ${CMAKE_BUILD_TYPE}\n")
+
 
 message("################################################################################
 #                                   Platform                                   #
 ################################################################################")
+colorFormatText(BOLD COLOR BLUE "Host System Processor:")
+message("${COLOR_FORMATTED_TEXT}   ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+colorFormatText(BOLD COLOR BLUE "Target System Processor:")
+message("${COLOR_FORMATTED_TEXT} ${CMAKE_SYSTEM_PROCESSOR}")
+
+
 colorFormatText(BOLD COLOR BLUE "System name:")
 message("${COLOR_FORMATTED_TEXT} ${CMAKE_SYSTEM_NAME}")
 colorFormatText(BOLD COLOR BLUE "UNIX:")
-message("${COLOR_FORMATTED_TEXT} ${UNIX}")
+message("${COLOR_FORMATTED_TEXT}  ${UNIX}")
 colorFormatText(BOLD COLOR BLUE "APPLE:")
 message("${COLOR_FORMATTED_TEXT} ${APPLE}")
 colorFormatText(BOLD COLOR BLUE "WIN32:")

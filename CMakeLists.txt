@@ -2,7 +2,7 @@
 #                       CMake file for HashMe static lib                       #
 ################################################################################
 
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.26)
 
 ###########################################################
 # Set options for sub projects
@@ -59,7 +59,7 @@ target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR
 
 ###########################################################
 # Project versioning
-configure_file("CMake additional/HashMeVersion.hpp.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/include/HashMeVersion.hpp")
+configure_file("cmake additional/HashMeVersion.hpp.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/include/HashMeVersion.hpp")
 
 ###########################################################
 # Examples
@@ -73,6 +73,16 @@ if (WIN32)
 	endif()
 else()
 	target_compile_options("${PROJECT_NAME}" PRIVATE "-O3")
+endif()
+
+
+#############################################################
+# SIMD specific compiler settings
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # GCC
+	if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64") # Do we compile for arm64?
+		target_compile_options("${PROJECT_NAME}" PRIVATE "-march=armv8-a+crypto -ftree-vectorize")
+		#-march=armv8-a+crc+crypto
+	endif()
 endif()
 
 ###########################################################
@@ -91,6 +101,7 @@ if (WIN32)
 	if (MSVC)
 		RemoveRTCFlagDebug_VS()
 		RemoveRTCFlagRelease_VS()
+		
 		target_compile_options("${PROJECT_NAME}" PRIVATE "/W3")
 		#target_compile_options("${PROJECT_NAME}" PRIVATE "/WX")
 		#target_compile_options("${PROJECT_NAME}" PRIVATE "/wd4244")
@@ -99,6 +110,7 @@ if (WIN32)
 	endif()
 	# Force Win32 to UNICODE
 	target_compile_definitions("${PROJECT_NAME}" PRIVATE UNICODE _UNICODE)
+	#target_compile_options("${PROJECT_NAME}" PRIVATE "/utf-8")
 else()
 	target_compile_options("${PROJECT_NAME}" PRIVATE "-Wall")
 	target_compile_options("${PROJECT_NAME}" PRIVATE "-Wextra")
@@ -112,11 +124,11 @@ endif()
 
 ###########################################################
 # Helper for formatting and printing text with color
-include("CMake additional/colorFormatting.cmake")
+include("cmake additional/colorFormatting.cmake")
 
 ###########################################################
 # Include summary file for printing various information
-include("CMake additional/printSummary.cmake")
+include("cmake additional/printSummary.cmake")
 
 # Print the information
 _PRINT_SUMMARY()
