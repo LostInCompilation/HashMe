@@ -16,7 +16,7 @@ then
 	
 	rm -rf build/*
 	
-	cmake -S . -B build/ --fresh -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+	cmake -S . -B build/ --fresh -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_COLOR_DIAGNOSTICS=ON
 else
-	cmake -S . -B build/ -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+	cmake -S . -B build/ -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_COLOR_DIAGNOSTICS=ON
 fi

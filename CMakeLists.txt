@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.29)
+################################################################################
+#                       CMake file for HashMe static lib                       #
+################################################################################
 
-# Print build type
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+cmake_minimum_required(VERSION 3.29)
 
 ###########################################################
 # Set options for sub projects
@@ -12,6 +13,20 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW) # Needed to set options of subprojects ins
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_CXX_EXTENSIONS false) # Don't use GNU++
+
+###########################################################
+# Set build output directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/debug")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin/debug")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin/release")
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/debug")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin/debug")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin/release")
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/debug")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin/debug")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin/release")
 
 ###########################################################
 # Our project
@@ -44,7 +59,7 @@ target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR
 
 ###########################################################
 # Project versioning
-configure_file(HashMeVersion.hpp.cmake "${CMAKE_CURRENT_SOURCE_DIR}/include/HashMeVersion.hpp")
+configure_file("CMake additional/HashMeVersion.hpp.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/include/HashMeVersion.hpp")
 
 ###########################################################
 # Examples
@@ -94,3 +109,14 @@ else()
 	#target_compile_options("${PROJECT_NAME}" PRIVATE "-Werror")
 	#target_compile_options("${PROJECT_NAME}" PRIVATE "-Wsign-conversion")
 endif()
+
+###########################################################
+# Helper for formatting and printing text with color
+include("CMake additional/colorFormatting.cmake")
+
+###########################################################
+# Include summary file for printing various information
+include("CMake additional/printSummary.cmake")
+
+# Print the information
+_PRINT_SUMMARY()

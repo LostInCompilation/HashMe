@@ -38,7 +38,7 @@ namespace HashMe
 {
 
 // ***************************************************
-// Abstract hasher base class
+// Abstract hasher base class as our interface
 class HasherBase
 {
 protected:

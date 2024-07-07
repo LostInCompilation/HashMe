@@ -110,7 +110,7 @@ void Hasher<SHA256, HARDWARE>::ProcessARM(const uint8_t* preparedData, uint64_t 
         MSG2 = vld1q_u32(reinterpret_cast<const uint32_t*>(preparedData + 32));
         MSG3 = vld1q_u32(reinterpret_cast<const uint32_t*>(preparedData + 48));
 
-#ifdef HM_LITTLE_ENDIAN // Reverse byte order if host is little endian to match SHA256 big endian
+#ifdef HM_LITTLE_ENDIAN // Reverse byte order if host is little endian to match SHA256 big endian requirement
         MSG0 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG0)));
         MSG1 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG1)));
         MSG2 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG2)));
