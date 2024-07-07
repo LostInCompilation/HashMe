@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 BUILD_TYPE=$1
 FRESH_BUILD=$2

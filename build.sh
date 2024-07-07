@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Create build directory
 mkdir -p build
