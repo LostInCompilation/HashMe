@@ -59,7 +59,7 @@ const std::string testStringHashSHA256_expected = "a665a45920422f9d417e4867efdc4
 const std::string testStringHashMD5_expected = "202cb962ac59075b964b07152d234b70";
 
 // Testing mode
-//#define TEST_BIG_DATA // Use big data for test
+#define TEST_BIG_DATA // Use big data for test
 
 // ***************************************************
 // SHA256 software implementation
