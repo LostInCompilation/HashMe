@@ -42,10 +42,8 @@ endif()
 # SIMD specific compiler settings
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # GCC
 	if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64") # Do we compile for arm64?
-		message("SIMD SETTINGS SET!")
-		target_compile_options("${PROJECT_NAME}" PRIVATE "-march=armv8-a+crypto")
+		target_compile_options("${PROJECT_NAME}" PRIVATE "-march=armv8-a+crypto") #-march=armv8-a+crc+crypto
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
-		#-march=armv8-a+crc+crypto -ftree-vectorize
 	endif()
 endif()
 
@@ -77,9 +75,9 @@ else()
 	target_compile_options("${PROJECT_NAME}" PRIVATE "-Wall")
 	target_compile_options("${PROJECT_NAME}" PRIVATE "-Wextra")
 	target_compile_options("${PROJECT_NAME}" PRIVATE "-pedantic")
-	target_compile_options("${PROJECT_NAME}" PRIVATE "-Wmissing-declarations")
+	#target_compile_options("${PROJECT_NAME}" PRIVATE "-Wmissing-declarations")
 	target_compile_options("${PROJECT_NAME}" PRIVATE "-Wdeprecated")
-	target_compile_options("${PROJECT_NAME}" PRIVATE "-Wshadow")
+	#target_compile_options("${PROJECT_NAME}" PRIVATE "-Wshadow")
 	#target_compile_options("${PROJECT_NAME}" PRIVATE "-Werror")
 	#target_compile_options("${PROJECT_NAME}" PRIVATE "-Wsign-conversion")
 endif()
