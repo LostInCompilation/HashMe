@@ -37,7 +37,19 @@ the following restrictions:
 // ***************************************************
 // Compiler detection
 #if !defined(HASH_PREDEF_COMP_MSVC_AVAILABLE) && !defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) && !defined(HASH_PREDEF_COMP_GNUC_AVAILABLE)
-#error Currently only GCC, CLANG and MSVC compilers are tested. You can compile with a different compiler by commenting out this error.
+#error Currently only GCC, Apple CLANG and MSVC compilers are tested. You can compile with a different compiler by commenting out this error.
+#endif
+
+// ***************************************************
+// Compiler version to detect <format> capability
+#if defined(HASH_PREDEF_COMP_GNUC_AVAILABLE) && !defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) // GCC
+    #if (HASH_PREDEF_COMP_GNUC >= HASH_PREDEF_VERSION_NUMBER(13, 1, 0)) // GCC version >= 13.1
+        #define HM_COMPILER_HAS_FMT_CAPABILITY
+    #endif
+#elif defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) && defined(HASH_PREDEF_OS_MACOS) // Apple clang
+    #if (HASH_PREDEF_COMP_CLANG >= HASH_PREDEF_VERSION_NUMBER(15, 0, 0)) // Apple clang version >= 15.0
+        #define HM_COMPILER_HAS_FMT_CAPABILITY
+    #endif
 #endif
 
 // ***************************************************

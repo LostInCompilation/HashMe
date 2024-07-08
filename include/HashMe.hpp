@@ -35,21 +35,26 @@ the following restrictions:
 #define HashMe_hpp
 
 // ***************************************************
+// predef library
+#include "predef.h"
+
+// HashMe platform specific config
+#include "PlatformConfig.hpp"
+
+// ***************************************************
 // System includes
 #include <cstdint>
 #include <cstring>
 #include <memory>
 #include <array>
 #include <vector>
-#include <format>
 
-// ***************************************************
-// predef library
-#include "predef.h"
+#ifdef HM_COMPILER_HAS_FMT_CAPABILITY
+#include <format>
+#endif
 
 // ***************************************************
 // Lib includes
-#include "PlatformConfig.hpp"
 #include "HashMeVersion.hpp"
 #include "Utils.hpp"
 #include "HasherBase.hpp"

@@ -37,6 +37,7 @@ using namespace HashMe;
 
 // ***************************************************
 // Helper function to convert the hash to a string of hex values with fixed size (two digits)
+#ifdef HM_COMPILER_HAS_FMT_CAPABILITY
 std::string Utils::HashToHexString(const std::vector<uint8_t>& hash)
 {
     std::string result = "";
@@ -46,3 +47,18 @@ std::string Utils::HashToHexString(const std::vector<uint8_t>& hash)
     
     return result;
 }
+#else
+std::string Utils::HashToHexString(const std::vector<uint8_t>& hash)
+{
+    const char lookup[] = "0123456789abcdef";
+    std::string result = "";
+    
+    for(uint32_t i = 0; i < hash.size(); i++)
+    {
+        result += lookup[hash[i] >> 4];
+        result += lookup[hash[i] & 0x0F];
+    }
+    
+    return result;
+}
+#endif
