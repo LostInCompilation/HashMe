@@ -96,7 +96,7 @@ PICOBENCH(SHA256_Software);
 // SHA256 hardware implementation
 double SHA256_Hardware_Speed = 0.0;
 std::string SHA256_Hardware_Hash = "";
-void SHA256_Hardware(picobench::state& s)
+/*void SHA256_Hardware(picobench::state& s)
 {
     std::vector<uint8_t> hashResult;
     Hasher<SHA256, HARDWARE> hasher;
@@ -121,7 +121,7 @@ void SHA256_Hardware(picobench::state& s)
     SHA256_Hardware_Hash = Utils::HashToHexString(hashResult);
     SHA256_Hardware_Speed += static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
 }
-PICOBENCH(SHA256_Hardware).baseline();
+PICOBENCH(SHA256_Hardware).baseline();*/
 
 // ***************************************************
 // MD5 software implementation
