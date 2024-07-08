@@ -2,7 +2,7 @@
 #                       CMake file for HashMe static lib                       #
 ################################################################################
 
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.25)
 
 ###########################################################
 # Set options for sub projects

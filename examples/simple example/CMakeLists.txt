@@ -2,7 +2,7 @@
 #                     CMake file for HashMe simple example                     #
 ################################################################################
 
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.25)
 
 ###########################################################
 # Use C++20
