@@ -7,17 +7,8 @@
 
 macro(_PRINT_SUMMARY)
 
-message("\n\n\n\n\n\n")
-
-colorFormatTextAppend(COLOR RED "This is ")
-colorFormatTextAppend(COLOR GREEN "a multicolor ")
-colorFormatTextAppend(BOLD COLOR BLUE "message ")
-colorFormatTextAppend(COLOR MAGENTA "test")
-message("${COLOR_FORMATTED_TEXT_COMBINED}")
-
-message("\n\n\n\n\n\n\n\n\n\n\n\n")
-
-
+# Print new line
+message("")
 
 message("################################################################################
 #                                   General                                    #
