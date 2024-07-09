@@ -2,8 +2,11 @@
 #                  Helper file for formatting text with color                  #
 #                                                                              #
 # Supported colors: NORMAL, BLACK, RED, GREEN, YELLOW, BLUE,                   #
-# 					MAGENTA, CYAN, WHITE                                       #
-# Supported style: BOLD                                                        #
+#                   MAGENTA, CYAN, WHITE                                       #
+# Supported style:  BOLD                                                       #
+#                                                                              #
+# (C) 2024 Marc Schöndorf                                                      #
+# Licensed under the zlib License. See LICENSE.md                              #
 ################################################################################
 
 # Formats given string with colors and writes the result in
@@ -11,6 +14,8 @@
 #
 # Example:  colorFormatText(COLOR BLUE "My blue text")
 #           colorFormatText(BOLD COLOR RED "My bold red text")
+#
+# To print: message("${COLOR_FORMATTED_TEXT}")
 #
 function(colorFormatText)
     cmake_parse_arguments(PARSE_ARGV 0 "_TEXT" "BOLD" "COLOR" "")
@@ -40,12 +45,28 @@ function(colorFormatText)
     set(COLOR_FORMATTED_TEXT ${_FORMATTED_TEXT_RESULT} PARENT_SCOPE)
 endfunction()
 
+# Formats given string with colors and appends the result to
+# the COLOR_FORMATTED_TEXT_COMBINED variable, which can be used
+# in the parent scope.
+#
+# Example:  colorFormatTextAppend(COLOR BLUE "My blue text")
+#           colorFormatTextAppend(BOLD COLOR RED "My bold red text")
+#
+# To print: message("${COLOR_FORMATTED_TEXT_COMBINED}")
+#
+function(colorFormatTextAppend)
+    colorFormatText(${ARGN})
+    
+    # Append formatted text to COLOR_FORMATTED_TEXT_COMBINED
+    set(COLOR_FORMATTED_TEXT_COMBINED "${COLOR_FORMATTED_TEXT_COMBINED}${COLOR_FORMATTED_TEXT}" PARENT_SCOPE)
+endfunction()
+
 # Directly prints formatted text
 #
-# Example:  printColorFormattedText(COLOR BLUE "My blue text")
-#           printColorFormattedText(BOLD COLOR RED "My bold red text")
+# Example:  messageWithColor(COLOR BLUE "My blue text")
+#           messageWithColor(BOLD COLOR RED "My bold red text")
 #
-function(printColorFormattedText)
+function(messageWithColor)
     colorFormatText(${ARGN})
     message(${COLOR_FORMATTED_TEXT})
 endfunction()

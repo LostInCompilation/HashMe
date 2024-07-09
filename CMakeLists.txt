@@ -1,5 +1,8 @@
 ################################################################################
 #                       CMake file for HashMe static lib                       #
+#                                                                              #
+# (C) 2024 Marc Schöndorf                                                      #
+# Licensed under the zlib License. See LICENSE.md                              #
 ################################################################################
 
 cmake_minimum_required(VERSION 3.25)

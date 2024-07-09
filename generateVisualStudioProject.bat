@@ -1,3 +1,10 @@
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Script for generating Visual Studio project files.                         ::
+::                                                                            ::
+:: (C) 2024 Marc Schöndorf                                                    ::
+:: Licensed under the zlib License. See LICENSE.md                            ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 @echo off
 
 IF "%~1" == "" GOTO HELP_TEXT

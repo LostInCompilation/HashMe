@@ -1,10 +1,10 @@
 #!/bin/bash
 
 ################################################################################
-# Script for configuring the build.											   #
-#																			   #
-# (C) 2024 Marc Schöndorf													   #
-# Licensed under zlib License. See LICENSE.md								   #
+# Script for configuring the build.                                            #
+#                                                                              #
+# (C) 2024 Marc Schöndorf                                                      #
+# Licensed under the zlib License. See LICENSE.md                              #
 ################################################################################
 
 # Vars
