@@ -50,6 +50,10 @@ the following restrictions:
     #if (HASH_PREDEF_COMP_CLANG >= HASH_PREDEF_VERSION_NUMBER(15, 0, 0)) // Apple clang version >= 15.0
         #define HM_COMPILER_HAS_FMT_CAPABILITY
     #endif
+#elif defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) && !defined(HASH_PREDEF_OS_MACOS) // Clang
+    #if (HASH_PREDEF_COMP_CLANG >= HASH_PREDEF_VERSION_NUMBER(17, 0, 0)) // Clang version >= 17.0
+        #define HM_COMPILER_HAS_FMT_CAPABILITY
+    #endif
 #endif
 
 // ***************************************************
