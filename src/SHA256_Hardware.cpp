@@ -447,8 +447,8 @@ void Hasher<SHA256, HARDWARE>::ProcessX86(const uint8_t* preparedData, uint64_t 
     STATE1 = _mm_alignr_epi8(STATE1, TMP, 8);    // ABEF
 
     // Save the new state
-    _mm_storeu_si128(reinterpret_cast<const __m128i*>(&m_State[0]), STATE0);
-    _mm_storeu_si128(reinterpret_cast<const __m128i*>(&m_State[4]), STATE1);
+    _mm_storeu_si128(reinterpret_cast<const __m128i_u*>(&m_State[0]), STATE0);
+    _mm_storeu_si128(reinterpret_cast<const __m128i_u*>(&m_State[4]), STATE1);
 }
 #endif
 
