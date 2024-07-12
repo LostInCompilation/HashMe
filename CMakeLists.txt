@@ -84,6 +84,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # GCC
 	if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64") # Do we compile for arm64?
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-march=armv8-a+crypto") #-march=armv8-a+crc+crypto
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
+	elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64"OR CMAKE_SYSTEM_PROCESSOR STREQUAL "Win32")
+		target_compile_options("${PROJECT_NAME}" PRIVATE "-msse4")
+		target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
 	endif()
 endif()
 
