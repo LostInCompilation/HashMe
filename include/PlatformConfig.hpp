@@ -76,10 +76,9 @@ the following restrictions:
         #if (HASH_PREDEF_HW_SIMD_ARM >= HASH_PREDEF_HW_SIMD_ARM_NEON_VERSION) // ARM NEON available (ARMv8 and newer)
             #define HM_SIMD_ARM
         #endif
-    #elif HASH_PREDEF_HW_SIMD_X86
-        #pragma message("x86 SIMD is not yet implemented.")
-    #elif HASH_PREDEF_HW_SIMD_X86_AMD
-        #pragma message("x86 AMD specific SIMD is not yet implemented.")
+    #elif HASH_PREDEF_HW_SIMD_X86 || HASH_PREDEF_HW_SIMD_X86_AMD
+        #define HM_SIMD_X86
+        //#pragma message("x86 SIMD is not yet implemented.")
     #endif
 #else
 #pragma message("Hardware acceleration (SIMD) is not available on this platform.")

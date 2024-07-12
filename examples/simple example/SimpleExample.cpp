@@ -59,7 +59,7 @@ const std::string testStringHashSHA256_expected = "a665a45920422f9d417e4867efdc4
 const std::string testStringHashMD5_expected = "202cb962ac59075b964b07152d234b70";
 
 // Testing mode
-#define TEST_BIG_DATA // Use big data for test
+//#define TEST_BIG_DATA // Use big data for test
 
 // ***************************************************
 // SHA256 software implementation
@@ -96,7 +96,7 @@ PICOBENCH(SHA256_Software);
 // SHA256 hardware implementation
 double SHA256_Hardware_Speed = 0.0;
 std::string SHA256_Hardware_Hash = "";
-/*void SHA256_Hardware(picobench::state& s)
+void SHA256_Hardware(picobench::state& s)
 {
     std::vector<uint8_t> hashResult;
     Hasher<SHA256, HARDWARE> hasher;
@@ -121,7 +121,7 @@ std::string SHA256_Hardware_Hash = "";
     SHA256_Hardware_Hash = Utils::HashToHexString(hashResult);
     SHA256_Hardware_Speed += static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
 }
-PICOBENCH(SHA256_Hardware).baseline();*/
+PICOBENCH(SHA256_Hardware).baseline();
 
 // ***************************************************
 // MD5 software implementation
@@ -201,6 +201,7 @@ void PrintSpeedAndHash()
 #ifndef TEST_BIG_DATA
     // Check generated hashes for testString
     assert(testStringHashSHA256_expected == SHA256_Software_Hash);
+    assert(testStringHashSHA256_expected == SHA256_Hardware_Hash);
     assert(testStringHashMD5_expected == MD5_Software_Hash);
 #endif
 }

@@ -68,6 +68,15 @@ the following restrictions:
 #include <arm_neon.h>
 #endif
 
+// x86 SHA SIMD
+#if defined(HASH_PREDEF_COMP_GNUC_AVAILABLE) && defined(HM_SIMD_X86)
+#include <x86intrin.h>
+#endif
+
+#if defined(HASH_PREDEF_COMP_MSVC_AVAILABLE) && defined(HM_SIMD_X86)
+# include <immintrin.h>
+#endif
+
 // ***************************************************
 // Lib settings
 #define HM_ENABLE_NAMESPACE_ALIAS // Enable the "HM" namespace alias additionally to "HashMe"

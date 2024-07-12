@@ -34,7 +34,7 @@ the following restrictions:
 #ifndef SHA256_Hardware_hpp
 #define SHA256_Hardware_hpp
 
-#ifdef HM_SIMD_ARM
+#if defined(HM_SIMD_ARM) || defined(HM_SIMD_X86)
 
 namespace HashMe
 {
@@ -78,7 +78,12 @@ private:
     virtual void Initialize() override;
     
     uint64_t     PrepareData(const uint8_t* const data, const uint64_t size, uint8_t** const preparedData);
+    
+#ifdef HM_SIMD_ARM
     void         ProcessARM(const uint8_t* preparedData, uint64_t size);
+#elif defined(HM_SIMD_X86)
+    void         ProcessX86(const uint8_t* preparedData, uint64_t size);
+#endif
     
 public:
     Hasher();
@@ -101,6 +106,6 @@ public:
 
 }
 
-#endif /* HM_SIMD_ARM */
+#endif /* HM_SIMD_ARM || HM_SIMD_X86 */
 
 #endif /* SHA256_Hardware_hpp */
