@@ -229,14 +229,15 @@ void PrintPredefInfo()
     
     // ***************************************************
     // Check for SIMD
-#if defined(HASH_PREDEF_HW_SIMD_AVAILABLE)
+#ifdef HASH_PREDEF_HW_SIMD_AVAILABLE
     std::cout << "SIMD detected: ";
 #endif
     
 #if HASH_PREDEF_HW_SIMD_ARM // ARM SIMD
     std::cout << "ARM SIMD. Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_HW_SIMD_ARM) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_HW_SIMD_ARM) << std::endl;
-#elif HASH_PREDEF_HW_SIMD_X86 // X86 SIMD
+#elif HASH_PREDEF_HW_SIMD_X86 || HASH_PREDEF_HW_SIMD_X86_AMD // X86 SIMD (AMD)
     std::cout << "x86 SIMD. Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_HW_SIMD_X86) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_HW_SIMD_X86) << std::endl;
+    std::cout << "x86 SIMD AMD. Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_HW_SIMD_X86_AMD) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_HW_SIMD_X86_AMD) << std::endl;
 #endif
     
     std::cout << std::endl;

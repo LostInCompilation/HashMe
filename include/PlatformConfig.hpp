@@ -68,6 +68,9 @@ the following restrictions:
 
 // ***************************************************
 // SIMD
+
+//HASH_PREDEF_HW_SIMD_X86_AMD
+
 #ifdef HASH_PREDEF_HW_SIMD_AVAILABLE
     #if HASH_PREDEF_HW_SIMD_ARM
         #if (HASH_PREDEF_HW_SIMD_ARM >= HASH_PREDEF_HW_SIMD_ARM_NEON_VERSION) // ARM NEON available (ARMv8 and newer)
