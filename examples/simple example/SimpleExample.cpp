@@ -240,6 +240,10 @@ void PrintPredefInfo()
     std::cout << "x86 SIMD AMD. Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_HW_SIMD_X86_AMD) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_HW_SIMD_X86_AMD) << std::endl;
 #endif
     
+#ifdef __SSE3__
+    std::cout << "SSE3 is defined!" std::endl;
+#endif
+    
     std::cout << std::endl;
 }
 

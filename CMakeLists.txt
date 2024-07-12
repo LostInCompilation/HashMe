@@ -85,8 +85,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # GCC
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-march=armv8-a+crypto") #-march=armv8-a+crc+crypto
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
 	elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "Win32")
-		target_compile_options("${PROJECT_NAME}" PRIVATE "-msse4")
-		target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
+		target_compile_options("${PROJECT_NAME}" PRIVATE "-march=native")
+		target_compile_options("${PROJECT_NAME}" PRIVATE "-msse4.2")
+		#target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
 		message("SSE4 enabled! XXXXXXXXXXXXXXXXXXXXXX")
 	endif()
 endif()
