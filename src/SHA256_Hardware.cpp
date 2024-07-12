@@ -276,10 +276,10 @@ void Hasher<SHA256, HARDWARE>::ProcessX86(const uint8_t* preparedData, uint64_t 
         CDGH_SAVE = STATE1;
 
         // Load data
-        MSG = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data + 0));
-        MSG1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data + 16));
-        MSG2 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data + 32));
-        MSG3 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data + 48));
+        MSG = _mm_loadu_si128(reinterpret_cast<const __m128i*>(preparedData + 0));
+        MSG1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(preparedData + 16));
+        MSG2 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(preparedData + 32));
+        MSG3 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(preparedData + 48));
         
         // Rounds 0-3
         //MSG = _mm_loadu_si128((const __m128i*) (data+0));
@@ -447,8 +447,8 @@ void Hasher<SHA256, HARDWARE>::ProcessX86(const uint8_t* preparedData, uint64_t 
     STATE1 = _mm_alignr_epi8(STATE1, TMP, 8);    // ABEF
 
     // Save the new state
-    _mm_storeu_si128((__m128i*) &state[0], STATE0);
-    _mm_storeu_si128((__m128i*) &state[4], STATE1);
+    _mm_storeu_si128(reinterpret_cast<const __m128i*>(&m_State[0]), STATE0);
+    _mm_storeu_si128(reinterpret_cast<const __m128i*>(&m_State[4]), STATE1);
 }
 #endif
 

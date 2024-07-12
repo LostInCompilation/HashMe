@@ -89,7 +89,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # GCC
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-msse4.1")
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-msha")
 		#target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
-		message("SSE4 enabled! XXXXXXXXXXXXXXXXXXXXXX")
 	endif()
 endif()
 
