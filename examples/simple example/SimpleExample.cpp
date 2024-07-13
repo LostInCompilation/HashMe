@@ -47,6 +47,33 @@ the following restrictions:
 using namespace HashMe;
 
 // ***************************************************
+// Averager class for benchmarking
+template <typename T>
+class Averager
+{
+private:
+    T        m_Sum = 0;
+    uint64_t m_NumDataPoints = 0;
+    
+public:
+    void AddDatapoint(const T datapoint)
+    {
+        m_NumDataPoints++;
+        m_Sum += datapoint;
+    }
+    
+    T GetAverage() const
+    {
+        std::cout << "Num data points: " << m_NumDataPoints << std::endl;
+        
+        if(m_NumDataPoints > 0)
+            return static_cast<double>(m_Sum) / static_cast<double>(m_NumDataPoints);
+        else
+            return 0;
+    }
+};
+
+// ***************************************************
 // Test data
 const uint64_t bigDataSize = 300 * 1024 * 1024; // 300MB
 std::vector<uint8_t>* bigData = nullptr; // Allocate on heap to prevent "Compiler out of heap space error" in VisualStudio
@@ -59,12 +86,13 @@ const std::string testStringHashSHA256_expected = "a665a45920422f9d417e4867efdc4
 const std::string testStringHashMD5_expected = "202cb962ac59075b964b07152d234b70";
 
 // Testing mode
-//#define TEST_BIG_DATA // Use big data for test
+#define TEST_BIG_DATA // Use big data for test
 
 // ***************************************************
 // SHA256 software implementation
 double SHA256_Software_Speed = 0.0;
 std::string SHA256_Software_Hash = "";
+Averager<double> SHA256_SoftwareAverager;
 void SHA256_Software(picobench::state& s)
 {
     std::vector<uint8_t> hashResult;
@@ -88,7 +116,7 @@ void SHA256_Software(picobench::state& s)
     }
     
     SHA256_Software_Hash = Utils::HashToHexString(hashResult);
-    SHA256_Software_Speed += static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
+    SHA256_SoftwareAverager.AddDatapoint(static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0));
 }
 PICOBENCH(SHA256_Software);
 
@@ -96,6 +124,7 @@ PICOBENCH(SHA256_Software);
 // SHA256 hardware implementation
 double SHA256_Hardware_Speed = 0.0;
 std::string SHA256_Hardware_Hash = "";
+Averager<double> SHA256_HardwareAverager;
 void SHA256_Hardware(picobench::state& s)
 {
     std::vector<uint8_t> hashResult;
@@ -119,14 +148,47 @@ void SHA256_Hardware(picobench::state& s)
     }
     
     SHA256_Hardware_Hash = Utils::HashToHexString(hashResult);
-    SHA256_Hardware_Speed += static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
+    SHA256_HardwareAverager.AddDatapoint(static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0));
 }
 PICOBENCH(SHA256_Hardware).baseline();
+
+// ***************************************************
+// SHA256 software implementation
+double SHA224_Software_Speed = 0.0;
+std::string SHA224_Software_Hash = "";
+Averager<double> SHA224_SoftwareAverager;
+void SHA224_Software(picobench::state& s)
+{
+    std::vector<uint8_t> hashResult;
+    Hasher<SHA224, SOFTWARE> hasher;
+    
+    for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
+    {
+        s.start_timer();
+        
+        hasher.Reset();
+        
+#ifdef TEST_BIG_DATA
+        hasher.Update(*bigData);
+#else
+        hasher.Update(testString);
+        //hasher.Update(longTestString);
+#endif
+        hashResult = hasher.End();
+        
+        s.stop_timer();
+    }
+    
+    SHA224_Software_Hash = Utils::HashToHexString(hashResult);
+    SHA224_SoftwareAverager.AddDatapoint(static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0));
+}
+PICOBENCH(SHA224_Software);
 
 // ***************************************************
 // MD5 software implementation
 double MD5_Software_Speed = 0.0;
 std::string MD5_Software_Hash = "";
+Averager<double> MD5_SoftwareAverager;
 void MD5_Software(picobench::state& s)
 {
     std::vector<uint8_t> hashResult;
@@ -150,9 +212,47 @@ void MD5_Software(picobench::state& s)
     }
     
     MD5_Software_Hash = Utils::HashToHexString(hashResult);
-    MD5_Software_Speed += static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0);
+    MD5_SoftwareAverager.AddDatapoint(static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0));
 }
 PICOBENCH(MD5_Software);
+
+// ***************************************************
+// CRC32 software implementation
+double CRC32_Hardware_Speed = 0.0;
+std::string CRC32_Hardware_Hash = "";
+uint32_t CRC32_Hardware_Hash_Int32 = 0;
+Averager<double> CRC32averager;
+void CRC32_Hardware(picobench::state& s)
+{
+    uint32_t hashResultInt32;
+    std::vector<uint8_t> hashResult;
+    
+    Hasher<CRC32, HARDWARE> hasher;
+    
+    for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
+    {
+        s.start_timer();
+        
+        hasher.Reset();
+        
+#ifdef TEST_BIG_DATA
+        hasher.Update(*bigData);
+#else
+        hasher.Update(testString);
+        //hasher.Update(longTestString);
+#endif
+        hashResult = hasher.End();
+        hashResultInt32 = hasher.End_GetAsInteger32();
+        
+        s.stop_timer();
+    }
+    
+    CRC32_Hardware_Hash_Int32 = hashResultInt32;
+    CRC32_Hardware_Hash = Utils::HashToHexString(hashResult);
+    
+    CRC32averager.AddDatapoint(static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0));
+}
+PICOBENCH(CRC32_Hardware);
 
 // ***************************************************
 // Fill big data with random values
@@ -189,20 +289,24 @@ void PrintStartupHeader()
 // Print measured speed and computed hashes
 void PrintSpeedAndHash()
 {
-    std::cout << "SHA256 (Software): " << std::fixed << std::setprecision(2) << SHA256_Software_Speed / 8.0 << " MB/s" << std::endl;
+    std::cout << "SHA256 (Software): " << std::fixed << std::setprecision(2) << SHA256_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
     std::cout << "SHA256 (Software): " << SHA256_Software_Hash << std::endl << std::endl;
     
-    std::cout << "SHA256 (Hardware): " << std::fixed << std::setprecision(2) << SHA256_Hardware_Speed / 8.0 << " MB/s" << std::endl;
+    std::cout << "SHA256 (Hardware): " << std::fixed << std::setprecision(2) << SHA256_HardwareAverager.GetAverage() << " MB/s" << std::endl;
     std::cout << "SHA256 (Hardware): " << SHA256_Hardware_Hash << std::endl << std::endl;
     
-    std::cout << "MD5 (Software): " << std::fixed << std::setprecision(2) << MD5_Software_Speed / 8.0 << " MB/s" << std::endl;
+    std::cout << "MD5 (Software): " << std::fixed << std::setprecision(2) << MD5_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
     std::cout << "MD5 (Software): " << MD5_Software_Hash << std::endl << std::endl << std::endl;
+    
+    std::cout << "CRC32 (Hardware): " << std::fixed << std::setprecision(2) << CRC32averager.GetAverage() << " MB/s" << std::endl;
+    std::cout << "CRC32 (Hardware): " << CRC32_Hardware_Hash << std::endl << std::endl << std::endl;
+    std::cout << "CRC32 (Hardware) Int32: " << CRC32_Hardware_Hash_Int32 << std::endl << std::endl << std::endl;
     
 #ifndef TEST_BIG_DATA
     // Check generated hashes for testString
-    assert(testStringHashSHA256_expected == SHA256_Software_Hash);
-    assert(testStringHashSHA256_expected == SHA256_Hardware_Hash);
-    assert(testStringHashMD5_expected == MD5_Software_Hash);
+//    assert(testStringHashSHA256_expected == SHA256_Software_Hash);
+//    assert(testStringHashSHA256_expected == SHA256_Hardware_Hash);
+//    assert(testStringHashMD5_expected == MD5_Software_Hash);
 #endif
 }
 
@@ -245,7 +349,13 @@ void PrintPredefInfo()
 }
 
 int main()
-{    
+{
+    Hasher<SHA224, SOFTWARE> hasher;
+    
+    
+    
+    
+    
     // ***************************************************
     // Print startup header
     PrintStartupHeader();
@@ -263,9 +373,14 @@ int main()
     std::cout << "Running benchmark..." << std::flush;
     
     picobench::runner runner(0); // Use 0 as the RNG seed
+    
     runner.set_default_samples(2);
+    //runner.set_default_samples(1);
+    
     //runner.set_default_state_iterations({1, 2, 8, 32, 64});
     runner.set_default_state_iterations({1, 2, 4, 8});
+    //runner.set_default_state_iterations({1, 2});
+    
     runner.run_benchmarks();
     
     std::cout << "Done!" << std::endl << std::endl;

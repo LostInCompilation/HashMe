@@ -45,7 +45,10 @@ the following restrictions:
 // System includes
 #include <cstdint>
 #include <cstring>
+#include <string>
 #include <memory>
+#include <bit>
+#include <stdexcept>
 #include <array>
 #include <vector>
 
@@ -60,12 +63,16 @@ the following restrictions:
 #include "HasherBase.hpp"
 #include "SHA256.hpp"
 #include "SHA256_Hardware.hpp"
+#include "SHA224.hpp"
 #include "MD5.hpp"
+
+#include "CRC32_Hardware.hpp"
 
 // ***************************************************
 // Platform specific includes for SIMD
 #ifdef HM_SIMD_ARM
 #include <arm_neon.h>
+#include <arm_acle.h>
 #endif
 
 // x86 SHA SIMD

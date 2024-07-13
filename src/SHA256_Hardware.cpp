@@ -465,7 +465,7 @@ void Hasher<SHA256, HARDWARE>::Update(const uint8_t* const data, const uint64_t 
     const uint64_t preparedDataSize = PrepareData(data, size, &preparedData);
     
     // Process preparedData
-#ifdef HM_SIMD_ARM
+#if defined(HM_SIMD_ARM)
     ProcessARM(preparedData, preparedDataSize);
 #elif defined(HM_SIMD_X86)
     ProcessX86(preparedData, preparedDataSize);

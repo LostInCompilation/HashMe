@@ -49,12 +49,16 @@ add_library("${PROJECT_NAME}"
 	include/HasherBase.hpp
 	include/SHA256.hpp
 	include/SHA256_Hardware.hpp
+	include/SHA224.hpp
 	include/MD5.hpp
+	include/CRC32_Hardware.hpp
 	src/HashMe.cpp
 	src/Utils.cpp
 	src/SHA256.cpp
 	src/SHA256_Hardware.cpp
+	src/SHA224.cpp
 	src/MD5.cpp
+	src/CRC32_Hardware.cpp
 )
 
 # The projects include directories
@@ -82,8 +86,8 @@ endif()
 # SIMD specific compiler settings
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # GCC
 	if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64") # Do we compile for arm64?
-		target_compile_options("${PROJECT_NAME}" PRIVATE "-march=armv8-a+crypto") #-march=armv8-a+crc+crypto
-		target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
+		target_compile_options("${PROJECT_NAME}" PRIVATE "-march=armv8-a+crypto+crc")
+		#target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
 	elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "Win32")
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-march=native")
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-msse4.1")
