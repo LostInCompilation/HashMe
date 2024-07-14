@@ -47,7 +47,7 @@ template <typename HashAlgorithm, typename HardwareSoftwareImplementation>
 class Hasher;
 
 // ***************************************************
-// Hasher class for SHA256 using software implementation
+// Hasher class for SHA224 using software implementation
 template <>
 class Hasher<SHA224, SOFTWARE> : public Hasher<SHA256, SOFTWARE>
 {
@@ -61,25 +61,24 @@ private:
     
     // Methods
     virtual void Initialize() override;
-    //void Transform(const uint8_t* const data);
     
 public:
-    Hasher() = default;
+    Hasher();
     ~Hasher() = default;
     
     // Allow copy but no assign
-    Hasher(const Hasher& other) {};
+    Hasher(const Hasher& other);
     Hasher& operator=(const Hasher& other) = delete;
     const Hasher& operator=(const Hasher& other) const = delete;
     
     // Methods
-    virtual void Reset() override {};
+    virtual void Reset() override;
     
-    virtual void Update(const uint8_t* const data, const uint64_t size) override {};
-    virtual void Update(const std::vector<uint8_t>& data) override {};
-    virtual void Update(const std::string& str) override {};
+    //virtual void Update(const uint8_t* const data, const uint64_t size) override;
+    //virtual void Update(const std::vector<uint8_t>& data) override;
+    //virtual void Update(const std::string& str) override;
     
-    virtual std::vector<uint8_t> End() override {};
+    virtual std::vector<uint8_t> End() override;
 };
 
 }

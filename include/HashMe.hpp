@@ -65,7 +65,6 @@ the following restrictions:
 #include "SHA256_Hardware.hpp"
 #include "SHA224.hpp"
 #include "MD5.hpp"
-
 #include "CRC32_Hardware.hpp"
 
 // ***************************************************

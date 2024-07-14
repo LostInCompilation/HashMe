@@ -37,32 +37,51 @@ the following restrictions:
 namespace HashMe::Utils
 {
 
-constexpr inline uint32_t U8toU32(const uint8_t data[4], const bool reverseEndianness)
+struct REVERSE_ENDIANNESS;
+struct KEEP_ENDIANNESS;
+
+// ***************************************************
+// Convert four bytes to 32 bit unsigned integer with optional endianness reversal
+template <typename EndiannessSetting>
+constexpr inline uint32_t U8toU32(const uint8_t data[4]);
+
+template <>
+constexpr inline uint32_t U8toU32<REVERSE_ENDIANNESS>(const uint8_t data[4])
 {
-    if(reverseEndianness)
-        return (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | (data[3]);
-    else
-        return (data[0]) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
+    return (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | (data[3]);
+}
+                                                                      
+template <>
+constexpr inline uint32_t U8toU32<KEEP_ENDIANNESS>(const uint8_t data[4])
+{
+    return (data[0]) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
 }
 
-constexpr inline void U32toU8(const uint32_t data, const bool reverseEndianness, uint8_t out[4])
+// ***************************************************
+// Convert 32 bit unsigned integer to four bytes with optional endianness reversal
+template <typename EndiannessSetting>
+constexpr inline void U32toU8(const uint32_t data, uint8_t out[4]);
+
+template <>
+constexpr inline void U32toU8<REVERSE_ENDIANNESS>(const uint32_t data, uint8_t out[4])
 {
-    if(reverseEndianness)
-    {
-        out[0] = static_cast<uint8_t>((data >> 24) & 0xFF);
-        out[1] = static_cast<uint8_t>((data >> 16) & 0xFF);
-        out[2] = static_cast<uint8_t>((data >> 8) & 0xFF);
-        out[3] = static_cast<uint8_t>(data & 0xFF);
-    }
-    else
-    {
-        out[0] = static_cast<uint8_t>(data & 0xFF);
-        out[1] = static_cast<uint8_t>((data >> 8) & 0xFF);
-        out[2] = static_cast<uint8_t>((data >> 16) & 0xFF);
-        out[3] = static_cast<uint8_t>((data >> 24) & 0xFF);
-    }
+    out[0] = static_cast<uint8_t>((data >> 24) & 0xFF);
+    out[1] = static_cast<uint8_t>((data >> 16) & 0xFF);
+    out[2] = static_cast<uint8_t>((data >> 8) & 0xFF);
+    out[3] = static_cast<uint8_t>(data & 0xFF);
+}
+                                                                      
+template <>
+constexpr inline void U32toU8<KEEP_ENDIANNESS>(const uint32_t data, uint8_t out[4])
+{
+    out[0] = static_cast<uint8_t>(data & 0xFF);
+    out[1] = static_cast<uint8_t>((data >> 8) & 0xFF);
+    out[2] = static_cast<uint8_t>((data >> 16) & 0xFF);
+    out[3] = static_cast<uint8_t>((data >> 24) & 0xFF);
 }
 
+// ***************************************************
+// Convert vector of bytes to a string of hex values
 std::string HashToHexString(const std::vector<uint8_t>& hash);
 
 }

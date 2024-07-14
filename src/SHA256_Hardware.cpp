@@ -489,6 +489,7 @@ std::vector<uint8_t> Hasher<SHA256, HARDWARE>::End()
     std::vector<uint8_t> hash(32); // 256 bit hash
     uint8_t* pointerIndex;
     
+    // Assemble hash
     for(uint8_t i = 0; i < 8; i++)
     {
 #ifdef HM_LITTLE_ENDIAN // Swap byte order if host is little endian

@@ -82,11 +82,12 @@ const std::string testString = "123";
 //const std::string testString = "12345678901234567890123456789012345678901234567890123456789012345"; // 65 chars
 
 // Hash results for checking
-const std::string testStringHashSHA256_expected = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
-const std::string testStringHashMD5_expected = "202cb962ac59075b964b07152d234b70";
+static constexpr std::string_view testStringHashSHA224_expected = "78d8045d684abd2eece923758f3cd781489df3a48e1278982466017f";
+static constexpr std::string_view testStringHashSHA256_expected = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
+static constexpr std::string_view testStringHashMD5_expected = "202cb962ac59075b964b07152d234b70";
 
 // Testing mode
-#define TEST_BIG_DATA // Use big data for test
+//#define TEST_BIG_DATA // Use big data for test
 
 // ***************************************************
 // SHA256 software implementation
@@ -289,24 +290,35 @@ void PrintStartupHeader()
 // Print measured speed and computed hashes
 void PrintSpeedAndHash()
 {
+    std::cout << "***********************************************************" << std::endl;
+    std::cout << "SHA224 (Software): " << std::fixed << std::setprecision(2) << SHA224_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
+    std::cout << "SHA224 (Software): " << SHA224_Software_Hash << std::endl << std::endl;
+    
+    std::cout << "***********************************************************" << std::endl;
     std::cout << "SHA256 (Software): " << std::fixed << std::setprecision(2) << SHA256_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
     std::cout << "SHA256 (Software): " << SHA256_Software_Hash << std::endl << std::endl;
     
+    std::cout << "***********************************************************" << std::endl;
     std::cout << "SHA256 (Hardware): " << std::fixed << std::setprecision(2) << SHA256_HardwareAverager.GetAverage() << " MB/s" << std::endl;
     std::cout << "SHA256 (Hardware): " << SHA256_Hardware_Hash << std::endl << std::endl;
     
+    std::cout << "***********************************************************" << std::endl;
     std::cout << "MD5 (Software): " << std::fixed << std::setprecision(2) << MD5_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
     std::cout << "MD5 (Software): " << MD5_Software_Hash << std::endl << std::endl << std::endl;
     
+    std::cout << "***********************************************************" << std::endl;
     std::cout << "CRC32 (Hardware): " << std::fixed << std::setprecision(2) << CRC32averager.GetAverage() << " MB/s" << std::endl;
     std::cout << "CRC32 (Hardware): " << CRC32_Hardware_Hash << std::endl << std::endl << std::endl;
     std::cout << "CRC32 (Hardware) Int32: " << CRC32_Hardware_Hash_Int32 << std::endl << std::endl << std::endl;
     
 #ifndef TEST_BIG_DATA
     // Check generated hashes for testString
-//    assert(testStringHashSHA256_expected == SHA256_Software_Hash);
-//    assert(testStringHashSHA256_expected == SHA256_Hardware_Hash);
-//    assert(testStringHashMD5_expected == MD5_Software_Hash);
+    assert(testStringHashSHA224_expected == SHA224_Software_Hash);
+    
+    assert(testStringHashSHA256_expected == SHA256_Software_Hash);
+    assert(testStringHashSHA256_expected == SHA256_Hardware_Hash);
+    
+    assert(testStringHashMD5_expected == MD5_Software_Hash);
 #endif
 }
 
@@ -349,13 +361,7 @@ void PrintPredefInfo()
 }
 
 int main()
-{
-    Hasher<SHA224, SOFTWARE> hasher;
-    
-    
-    
-    
-    
+{    
     // ***************************************************
     // Print startup header
     PrintStartupHeader();

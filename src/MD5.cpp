@@ -131,7 +131,7 @@ void Hasher<MD5, SOFTWARE>::Transform(const uint8_t block[MD5_BLOCK_LENGTH])
     uint32_t d = m_Context->state[3];
     
     for(uint32_t i = 0; i < (MD5_BLOCK_LENGTH >> 2); i++)
-        x[i] = Utils::U8toU32(&block[(i << 2)], false);
+        x[i] = Utils::U8toU32<Utils::KEEP_ENDIANNESS>(&block[(i << 2)]);
     
     // Round 1
     FF (a, b, c, d, x[ 0], S11, 0xd76aa478); /* 1 */
@@ -267,8 +267,8 @@ std::vector<uint8_t> Hasher<MD5, SOFTWARE>::End()
 {
     // Number of bits
     uint8_t numOfBits[8];
-    Utils::U32toU8(m_Context->count[0], false, &numOfBits[0]);
-    Utils::U32toU8(m_Context->count[1], false, &numOfBits[4]);
+    Utils::U32toU8<Utils::KEEP_ENDIANNESS>(m_Context->count[0], &numOfBits[0]);
+    Utils::U32toU8<Utils::KEEP_ENDIANNESS>(m_Context->count[1], &numOfBits[4]);
     
     uint32_t index = (m_Context->count[0] >> 3) & 0x3F; // Modulo 64
     uint32_t paddingSize = (index < 56) ? (56 - index) : (120 - index);
@@ -278,10 +278,10 @@ std::vector<uint8_t> Hasher<MD5, SOFTWARE>::End()
     // Append size before padding
     Update(numOfBits, 8);
     
-    // Get hash from state
+    // Assemble hash
     std::vector<uint8_t> hash(16); // 128 bit hash
     for(uint8_t i = 0; i < 4; i++)
-        Utils::U32toU8(m_Context->state[i], false, &hash.data()[(i << 2)]);
+        Utils::U32toU8<Utils::KEEP_ENDIANNESS>(m_Context->state[i], &hash.data()[(i << 2)]);
     
     // Cleanup sensitive data for security
 #ifdef HM_CLEANUP_TMP_MEMORY_AFTER_HASHING_FOR_SECURITY

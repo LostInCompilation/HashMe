@@ -101,9 +101,9 @@ void Hasher<SHA256, SOFTWARE>::Transform(const uint8_t* const data)
     {
         // Copy 1-byte data to 4-byte array
 #ifdef HM_LITTLE_ENDIAN
-        block[i] = Utils::U8toU32(&data[x], true); // Convert to big endian
+        block[i] = Utils::U8toU32<Utils::REVERSE_ENDIANNESS>(&data[x]); // Convert to big endian
 #else
-        block[i] = Utils::U8toU32(&data[x], false);
+        block[i] = Utils::U8toU32<Utils::KEEP_ENDIANNESS>(&data[x]);
 #endif
         x += 4;
         
@@ -235,13 +235,14 @@ std::vector<uint8_t> Hasher<SHA256, SOFTWARE>::End()
     // Transform
     Transform(m_Context->buffer);
     
+    // Assemble hash
     std::vector<uint8_t> hash(32); // 256 bit hash
     for(uint32_t i = 0; i < 8; i++)
     {
 #ifdef HM_LITTLE_ENDIAN
-        Utils::U32toU8(m_Context->state[i], true, &hash[i << 2]); // Transform SHA big endian to host little endian
+        Utils::U32toU8<Utils::REVERSE_ENDIANNESS>(m_Context->state[i], &hash[i << 2]); // Transform SHA big endian to host little endian
 #else
-        Utils::U32toU8(m_Context->state[i], false, &hash[i << 2]);
+        Utils::U32toU8<Utils::KEEP_ENDIANNESS>(m_Context->state[i], &hash[i << 2]);
 #endif
     }
     
