@@ -10,7 +10,7 @@ http://www.boost.org/LICENSE_1_0.txt)
 #define HASH_PREDEF_H
 #endif
 
-//#include <predef/language.h>
+#include <predef/language.h>
 #include <predef/architecture.h>
 #include <predef/compiler.h>
 #include <predef/library.h>

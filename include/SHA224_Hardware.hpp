@@ -27,18 +27,20 @@ the following restrictions:
 /*                      (C) 2024 Marc Schöndorf                     */
 /*                            See license                           */
 /*                                                                  */
-/*  SHA224.hpp                                                      */
-/*  Created: 13.07.2024                                             */
+/*  SHA224_Hardware.hpp                                             */
+/*  Created: 14.07.2024                                             */
 /*------------------------------------------------------------------*/
 
-#ifndef SHA224_hpp
-#define SHA224_hpp
+#ifndef SHA224_Hardware_hpp
+#define SHA224_Hardware_hpp
+
+#if defined(HM_SIMD_ARM) || defined(HM_SIMD_X86)
 
 namespace HashMe
 {
 
 // Dummy types for template
-struct SOFTWARE;
+struct HARDWARE;
 struct SHA224;
 
 // ***************************************************
@@ -47,9 +49,9 @@ template <typename HashAlgorithm, typename HardwareSoftwareImplementation>
 class Hasher;
 
 // ***************************************************
-// Hasher class for SHA224 using software implementation
+// Hasher class for SHA224 with SIMD support
 template <>
-class Hasher<SHA224, SOFTWARE> : public Hasher<SHA256, SOFTWARE>
+class Hasher<SHA224, HARDWARE> : public Hasher<SHA256, HARDWARE>
 {
 private:
     // ***************************************************
@@ -78,4 +80,6 @@ public:
 
 }
 
-#endif /* SHA224_hpp */
+#endif /* HM_SIMD_ARM || HM_SIMD_X86 */
+
+#endif /* SHA224_Hardware_hpp */

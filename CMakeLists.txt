@@ -50,14 +50,18 @@ add_library("${PROJECT_NAME}"
 	include/SHA256.hpp
 	include/SHA256_Hardware.hpp
 	include/SHA224.hpp
+	include/SHA224_Hardware.hpp
 	include/MD5.hpp
+	include/CRC_Software.hpp
 	include/CRC32_Hardware.hpp
 	src/HashMe.cpp
 	src/Utils.cpp
 	src/SHA256.cpp
 	src/SHA256_Hardware.cpp
 	src/SHA224.cpp
+	src/SHA224_Hardware.cpp
 	src/MD5.cpp
+	src/CRC_Software.cpp
 	src/CRC32_Hardware.cpp
 )
 
@@ -129,8 +133,7 @@ else()
 	target_compile_options("${PROJECT_NAME}" PRIVATE "-Wmissing-declarations")
 	target_compile_options("${PROJECT_NAME}" PRIVATE "-Wdeprecated")
 	target_compile_options("${PROJECT_NAME}" PRIVATE "-Wshadow")
-	#target_compile_options("${PROJECT_NAME}" PRIVATE "-Werror")
-	#target_compile_options("${PROJECT_NAME}" PRIVATE "-Wsign-conversion")
+	target_compile_options("${PROJECT_NAME}" PRIVATE "-Wsign-conversion")
 endif()
 
 ###########################################################

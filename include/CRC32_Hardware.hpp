@@ -49,7 +49,7 @@ template <typename HashAlgorithm, typename HardwareSoftwareImplementation>
 class Hasher;
 
 // ***************************************************
-// Hasher class for SHA256
+// Hasher class for CRC32 with SIMD support
 template <>
 class Hasher<CRC32, HARDWARE> : public HasherBase
 {
@@ -61,7 +61,7 @@ private:
     
 public:
     Hasher() = default;
-    ~Hasher() = default;
+    virtual ~Hasher() = default;
     
     // Allow copy but no assign
     Hasher(const Hasher& other);

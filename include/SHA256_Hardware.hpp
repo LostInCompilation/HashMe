@@ -49,11 +49,30 @@ template <typename HashAlgorithm, typename HardwareSoftwareImplementation>
 class Hasher;
 
 // ***************************************************
-// Hasher class for SHA256
+// Hasher class for SHA256 with SIMD support
 template <>
 class Hasher<SHA256, HARDWARE> : public HasherBase
 {
 private:
+    // ***************************************************
+    // Constants
+    inline static constexpr std::array<uint32_t, 8> INITIAL_HASH_VALUES = {
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+    };
+    
+    // Methods
+    virtual void Initialize() override;
+    
+    uint64_t     PrepareData(const uint8_t* const data, const uint64_t size, uint8_t** const preparedData);
+    
+#if defined(HM_SIMD_ARM)
+    void         ProcessARM(const uint8_t* preparedData, uint64_t size);
+#elif defined(HM_SIMD_X86)
+    void         ProcessX86(const uint8_t* preparedData, uint64_t size);
+#endif
+    
+protected:
     // ***************************************************
     // Constants
     inline static constexpr std::array<uint32_t, 64> K = {
@@ -66,28 +85,13 @@ private:
         0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
         0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
     };
-    inline static constexpr std::array<uint32_t, 8> INITIAL_HASH_VALUES = {
-        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
-    };
     
     // Context state
     uint32_t     m_State[8];
     
-    // Methods
-    virtual void Initialize() override;
-    
-    uint64_t     PrepareData(const uint8_t* const data, const uint64_t size, uint8_t** const preparedData);
-    
-#ifdef HM_SIMD_ARM
-    void         ProcessARM(const uint8_t* preparedData, uint64_t size);
-#elif defined(HM_SIMD_X86)
-    void         ProcessX86(const uint8_t* preparedData, uint64_t size);
-#endif
-    
 public:
     Hasher();
-    ~Hasher() = default;
+    virtual ~Hasher() = default;
     
     // Allow copy but no assign
     Hasher(const Hasher& other);

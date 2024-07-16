@@ -44,6 +44,7 @@ the following restrictions:
 // ***************************************************
 // System includes
 #include <cstdint>
+#include <stdlib.h>
 #include <cstring>
 #include <string>
 #include <memory>
@@ -64,7 +65,9 @@ the following restrictions:
 #include "SHA256.hpp"
 #include "SHA256_Hardware.hpp"
 #include "SHA224.hpp"
+#include "SHA224_Hardware.hpp"
 #include "MD5.hpp"
+#include "CRC_Software.hpp"
 #include "CRC32_Hardware.hpp"
 
 // ***************************************************

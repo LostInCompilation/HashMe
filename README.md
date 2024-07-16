@@ -32,20 +32,25 @@
 A simple to use, fast and modern C++20 Hash library which supports **hardware accelerated** algorithms (SIMD intrinsics) for **x86 and ARMv8 (like AppleSilicon)**. See [Performance and Benchmarks](#performance-and-benchmarks) for speeds. The static library provides very easy integration in your projects and ultra high speeds for the most common hash algorithms like **MD5, MD6, SHA0, SHA1, SHA2 (SHA224, SHA256, SHA384, SHA512), SHA3 (SHA3-224, SHA3-256, SHA3-384, SHA3-512), CRC16, CRC32, CRC64, CRC128** and others. See [Supported hash algorithms](#supported-hash-algorithms) for details.
 CMake build environment is supported, as well as generating projects for VisualStudio or Xcode.
 
-STREAMING FOR LARGE FILES
+TODO WRITE: STREAMING FOR LARGE FILES
 
 ### Supported hash algorithms
 The following hash algorithms are supported:
-Algorithm | Supported | Hardware acceleration (WIP) |
+Algorithm | Supported | Hardware acceleration |
 | -- | --------- | --------- |
-| MD5 | ✅ Yes | ⚠️ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
-| MD6 | ⚠️ WIP | ⚠️ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
+| CRC16 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| CRC32 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| CRC64 (ECMA) | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| MD5 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| MD6 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| SHA1 | ❌ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| SHA224 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA256 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
-| SHA512 | ⚠️ WIP | ⚠️ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
-| SHA3-512 | ⚠️ WIP | ⚠️ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
+| SHA512 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| SHA3-512 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 
 *⚠️ = Work in progress*
-*❌ = Not supported*
+*❌ = Not yet supported*
 
 ### Additional algorithms
 TODO Base64
@@ -54,14 +59,22 @@ TODO Base64
 #### ARMv8 (M1 Pro AppleSilicon)
 Algorithm      |   Speed (MB/s)
 ---------------|--------:
+CRC16 Software | 375.54 MB/s
+CRC16 Hardware (SIMD) | xxx MB/s
+CRC32 Software | 373.10 MB/s
+CRC32 Hardware (SIMD) | 8031.77 MB/s
+MD5 Software | 538.12 MB/s
+MD5 Hardware (SIMD) | XXX MB/s
+SHA224 Software | 218.50 MB/s
+SHA224 Hardware (SIMD) | 1644.54 MB/s
 SHA256 Software | 217.76 MB/s
 SHA256 Hardware (SIMD) | 1644.86 MB/s
-MD5 Software | 538.12 MB/s
+
 
 *Apple Clang, Release build, -O3 optimization*
 
 #### x86_64 (Intel)
-TODO
+**TODO**
 
 ## Getting the library
 To download the library simply clone the repository:

@@ -112,11 +112,7 @@ void Hasher<CRC32, HARDWARE>::Update(const std::string& str)
 std::vector<uint8_t> Hasher<CRC32, HARDWARE>::End()
 {
     std::vector<uint8_t> result(4);
-    
-    result[0] = m_CRC32Result >> 24;
-    result[1] = m_CRC32Result >> 16;
-    result[2] = m_CRC32Result >> 8;
-    result[3] = m_CRC32Result;
+    Utils::U32toU8<Utils::REVERSE_ENDIANNESS>(m_CRC32Result, &result[0]);
     
     return result;
 }

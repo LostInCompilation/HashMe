@@ -28,11 +28,10 @@ the following restrictions:
 /*                            See license                           */
 /*                                                                  */
 /*  SHA224.cpp                                                      */
-/*  Created: 13.76.2024                                             */
+/*  Created: 13.07.2024                                             */
 /*------------------------------------------------------------------*/
 
 #include "HashMe.hpp"
-#include <iostream>
 
 using namespace HashMe;
 

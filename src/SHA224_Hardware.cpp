@@ -27,55 +27,51 @@ the following restrictions:
 /*                      (C) 2024 Marc Schöndorf                     */
 /*                            See license                           */
 /*                                                                  */
-/*  SHA224.hpp                                                      */
-/*  Created: 13.07.2024                                             */
+/*  SHA224.cpp                                                      */
+/*  Created: 14.07.2024                                             */
 /*------------------------------------------------------------------*/
 
-#ifndef SHA224_hpp
-#define SHA224_hpp
+#include "HashMe.hpp"
 
-namespace HashMe
+#if defined(HM_SIMD_ARM) || defined(HM_SIMD_X86)
+
+using namespace HashMe;
+
+Hasher<SHA224, HARDWARE>::Hasher()
 {
-
-// Dummy types for template
-struct SOFTWARE;
-struct SHA224;
-
-// ***************************************************
-// Forward declaration for hasher class
-template <typename HashAlgorithm, typename HardwareSoftwareImplementation>
-class Hasher;
-
-// ***************************************************
-// Hasher class for SHA224 using software implementation
-template <>
-class Hasher<SHA224, SOFTWARE> : public Hasher<SHA256, SOFTWARE>
-{
-private:
-    // ***************************************************
-    // Constants
-    inline static constexpr std::array<uint32_t, 8> INITIAL_HASH_VALUES = {
-        0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939,
-        0xffc00b31, 0x68581511, 0x64f98fa7, 0xbefa4fa4
-    };
-    
-    // Methods
-    virtual void Initialize() override;
-    
-public:
-    Hasher();
-    virtual ~Hasher() = default;
-    
-    // Allow copy but no assign
-    Hasher(const Hasher& other);
-    Hasher& operator=(const Hasher& other) = delete;
-    const Hasher& operator=(const Hasher& other) const = delete;
-    
-    // Methods
-    virtual void Reset() override;
-    virtual std::vector<uint8_t> End() override;
-};
-
+    Initialize();
 }
 
-#endif /* SHA224_hpp */
+Hasher<SHA224, HARDWARE>::Hasher(const Hasher& other) : Hasher<SHA256, HARDWARE>(other)
+{
+}
+
+void Hasher<SHA224, HARDWARE>::Initialize()
+{
+    // Set state to initial hash values
+    std::copy(INITIAL_HASH_VALUES.begin(), INITIAL_HASH_VALUES.end(), m_State);
+}
+
+void Hasher<SHA224, HARDWARE>::Reset()
+{
+    Initialize();
+}
+
+std::vector<uint8_t> Hasher<SHA224, HARDWARE>::End()
+{
+    std::vector<uint8_t> hash(28); // 224 bit hash
+    
+    // Assemble hash
+    for(uint32_t i = 0; i < 7; i++) // Use uint32_t to avoid implicit sign conversion by left shift operator
+    {
+#ifdef HM_LITTLE_ENDIAN
+        Utils::U32toU8<Utils::REVERSE_ENDIANNESS>(m_State[i], &hash[i << 2]); // Transform SHA big endian to host little endian
+#else
+        Utils::U32toU8<Utils::KEEP_ENDIANNESS>(m_State[i], &hash[i << 2]);
+#endif
+    }
+    
+    return hash;
+}
+
+#endif /* HM_SIMD_ARM || HM_SIMD_X86 */

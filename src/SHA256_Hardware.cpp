@@ -487,25 +487,15 @@ void Hasher<SHA256, HARDWARE>::Update(const std::string& str)
 std::vector<uint8_t> Hasher<SHA256, HARDWARE>::End()
 {
     std::vector<uint8_t> hash(32); // 256 bit hash
-    uint8_t* pointerIndex;
     
     // Assemble hash
-    for(uint8_t i = 0; i < 8; i++)
-    {
-#ifdef HM_LITTLE_ENDIAN // Swap byte order if host is little endian
-    #ifdef HASH_PREDEF_COMP_MSVC_AVAILABLE // MSVC compiler
-        m_State[i] = _byteswap_ulong(m_State[i]);
-    #else
-        m_State[i] = __builtin_bswap32(m_State[i]);
-    #endif
-#endif /* HM_LITTLE_ENDIAN */
-        
-        pointerIndex = reinterpret_cast<uint8_t*>(&m_State[i]);
-        
-        hash[i << 2] = *pointerIndex++;
-        hash[(i << 2) + 1] = *pointerIndex++;
-        hash[(i << 2) + 2] = *pointerIndex++;
-        hash[(i << 2) + 3] = *pointerIndex;
+    for(uint32_t i = 0; i < 8; i++) // Use uint32_t to avoid implicit sign conversion by left shift operator
+    {        
+#ifdef HM_LITTLE_ENDIAN
+        Utils::U32toU8<Utils::REVERSE_ENDIANNESS>(m_State[i], &hash[i << 2]); // Transform SHA big endian to host little endian
+#else
+        Utils::U32toU8<Utils::KEEP_ENDIANNESS>(m_State[i], &hash[i << 2]);
+#endif
     }
     
     return hash;

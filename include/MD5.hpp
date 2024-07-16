@@ -83,7 +83,7 @@ private:
     
 public:
     Hasher();
-    ~Hasher() = default;
+    virtual ~Hasher() = default;
     
     // Allow copy but no assign
     Hasher(const Hasher& other);

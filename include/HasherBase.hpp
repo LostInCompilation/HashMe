@@ -43,7 +43,7 @@ class HasherBase
 {
 protected:
     HasherBase() = default;
-    ~HasherBase() = default;
+    virtual ~HasherBase() = default;
     
 public:
     HasherBase(const HasherBase& other) = delete;
