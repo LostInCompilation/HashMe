@@ -47,6 +47,7 @@ void Hasher<CRC32, HARDWARE>::Reset()
     m_CRC32Result = 0;
 }
 
+#if defined(HM_SIMD_ARM)
 void Hasher<CRC32, HARDWARE>::Update(const uint8_t* const data, const uint64_t size)
 {
     if(!data)
@@ -98,6 +99,12 @@ void Hasher<CRC32, HARDWARE>::Update(const uint8_t* const data, const uint64_t s
     
     m_CRC32Result = ~result;
 }
+#elif defined(HM_SIMD_X86)
+void Hasher<CRC32, HARDWARE>::Update(const uint8_t* const data, const uint64_t size)
+{
+    
+}
+#endif
 
 void Hasher<CRC32, HARDWARE>::Update(const std::vector<uint8_t>& data)
 {

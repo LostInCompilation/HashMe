@@ -88,7 +88,7 @@ uint64_t Hasher<SHA256, HARDWARE>::PrepareData(const uint8_t* const data, const 
     return preparedDataSize;
 }
 
-#ifdef HM_SIMD_ARM
+#if defined(HM_SIMD_ARM)
 void Hasher<SHA256, HARDWARE>::ProcessARM(const uint8_t* preparedData, uint64_t size)
 {
     uint32x4_t STATE0, STATE1, ABCD_SAVE, EFGH_SAVE;
@@ -490,7 +490,7 @@ std::vector<uint8_t> Hasher<SHA256, HARDWARE>::End()
     
     // Assemble hash
     for(uint32_t i = 0; i < 8; i++) // Use uint32_t to avoid implicit sign conversion by left shift operator
-    {        
+    {
 #ifdef HM_LITTLE_ENDIAN
         Utils::U32toU8<Utils::REVERSE_ENDIANNESS>(m_State[i], &hash[i << 2]); // Transform SHA big endian to host little endian
 #else
