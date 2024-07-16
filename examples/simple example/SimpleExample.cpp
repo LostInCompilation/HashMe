@@ -88,7 +88,7 @@ static constexpr std::string_view testStringHashCRC32_expected = "884863d2";
 static constexpr std::string_view testStringHashCRC64_expected = "30232844071cc561";
 
 // Testing mode
-#define TEST_BIG_DATA // Use big data for test
+//#define TEST_BIG_DATA // Use big data for test
 
 // ***************************************************
 // SHA256 software implementation
@@ -588,7 +588,9 @@ int main()
 //    //crc64_software.Update("456");
 //    std::cout << "CRC64 two step (software): " << Utils::HashToHexString(crc64_software.End()) << std::endl;
     
-    
+    Hasher<SHA256, HARDWARE> hasher;
+    hasher.Update("123");
+    hasher.End();
     
     
     // ***************************************************
