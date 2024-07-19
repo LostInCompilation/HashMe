@@ -62,7 +62,7 @@ protected:
     // The precomputed lookup table
     std::array<CRCSize, 256> m_LookupTable;
     
-    // Ctor, Dtor
+    // Ctor, Dtor are protected
     CRCBase(const CRCSize polynomial, const CRCSize firstRemainder, const CRCSize finalXOR);
     virtual ~CRCBase() = default;
     
@@ -73,7 +73,7 @@ protected:
     
     // Methods
     void CreateLookupTable();
-    CRCSize Compute(const CRCSize currentCRC, const uint8_t* const data, const uint64_t size);
+    [[nodiscard]] CRCSize Compute(const CRCSize currentCRC, const uint8_t* const data, const uint64_t size);
 };
 
 // ***************************************************
@@ -107,8 +107,8 @@ public:
     virtual void Update(const std::vector<uint8_t>& data) override;
     virtual void Update(const std::string& str) override;
     
-    virtual std::vector<uint8_t> End() override;
-    uint16_t End_GetAsInteger16();
+    [[nodiscard]] virtual std::vector<uint8_t> End() override;
+    [[nodiscard]] uint16_t End_GetAsInteger16();
 };
 
 // ***************************************************
@@ -137,8 +137,8 @@ public:
     virtual void Update(const std::vector<uint8_t>& data) override;
     virtual void Update(const std::string& str) override;
     
-    virtual std::vector<uint8_t> End() override;
-    uint32_t End_GetAsInteger32();
+    [[nodiscard]] virtual std::vector<uint8_t> End() override;
+    [[nodiscard]] uint32_t End_GetAsInteger32();
 };
 
 // ***************************************************
@@ -167,8 +167,8 @@ public:
     virtual void Update(const std::vector<uint8_t>& data) override;
     virtual void Update(const std::string& str) override;
     
-    virtual std::vector<uint8_t> End() override;
-    uint64_t End_GetAsInteger64();
+    [[nodiscard]] virtual std::vector<uint8_t> End() override;
+    [[nodiscard]] uint64_t End_GetAsInteger64();
 };
 
 }

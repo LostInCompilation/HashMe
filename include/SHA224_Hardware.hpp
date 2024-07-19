@@ -75,7 +75,7 @@ public:
     
     // Methods
     virtual void Reset() override;
-    virtual std::vector<uint8_t> End() override;
+    [[nodiscard]] virtual std::vector<uint8_t> End() override;
 };
 
 }

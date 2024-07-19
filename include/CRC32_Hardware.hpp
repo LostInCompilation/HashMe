@@ -75,8 +75,8 @@ public:
     virtual void Update(const std::vector<uint8_t>& data) override;
     virtual void Update(const std::string& str) override;
     
-    virtual std::vector<uint8_t> End() override;
-    uint32_t End_GetAsInteger32();
+    [[nodiscard]] virtual std::vector<uint8_t> End() override;
+    [[nodiscard]] uint32_t End_GetAsInteger32();
 };
 
 }

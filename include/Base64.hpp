@@ -27,55 +27,23 @@ the following restrictions:
 /*                      (C) 2024 Marc Schöndorf                     */
 /*                            See license                           */
 /*                                                                  */
-/*  SHA224.hpp                                                      */
-/*  Created: 13.07.2024                                             */
+/*  Base64_Software.hpp                                             */
+/*  Created: 18.07.2024                                             */
 /*------------------------------------------------------------------*/
 
-#ifndef SHA224_hpp
-#define SHA224_hpp
+#ifndef Base64_Software_hpp
+#define Base64_Software_hpp
 
-namespace HashMe
-{
-
-// Dummy types for template
-struct SOFTWARE;
-struct SHA224;
-
-// ***************************************************
-// Forward declaration for hasher class
-template <typename HashAlgorithm, typename HardwareSoftwareImplementation>
-class Hasher;
-
-// ***************************************************
-// Hasher class for SHA224 using software implementation
-template <>
-class Hasher<SHA224, SOFTWARE> : public Hasher<SHA256, SOFTWARE>
+class Base64
 {
 private:
-    // ***************************************************
-    // Constants
-    inline static constexpr std::array<uint32_t, 8> INITIAL_HASH_VALUES = {
-        0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939,
-        0xffc00b31, 0x68581511, 0x64f98fa7, 0xbefa4fa4
-    };
     
-    // Methods
-    virtual void Initialize() override;
     
 public:
-    Hasher();
-    virtual ~Hasher() = default;
+    Base64();
+    ~Base64();
     
-    // Allow copy but no assign
-    Hasher(const Hasher& other);
-    Hasher& operator=(const Hasher& other) = delete;
-    const Hasher& operator=(const Hasher& other) const = delete;
     
-    // Methods
-    virtual void Reset() override;
-    [[nodiscard]] virtual std::vector<uint8_t> End() override;
 };
 
-}
-
-#endif /* SHA224_hpp */
+#endif /* Base64_Software_hpp */

@@ -35,25 +35,49 @@ CMake build environment is supported, as well as generating projects for VisualS
 TODO WRITE: STREAMING FOR LARGE FILES
 
 ### Supported hash algorithms
-The following hash algorithms are supported:
+#### CRC
 Algorithm | Supported | Hardware acceleration |
 | -- | --------- | --------- |
 | CRC16 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | CRC32 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | CRC64 (ECMA) | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+
+#### MD
+Algorithm | Supported | Hardware acceleration |
+| -- | --------- | --------- |
 | MD5 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | MD6 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
-| SHA1 | ❌ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+
+#### SHA1 & SHA2
+Algorithm | Supported | Hardware acceleration |
+| -- | --------- | --------- |
+| SHA1 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA224 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA256 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
-| SHA512 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| SHA384 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| SHA512 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| SHA512/224 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| SHA512/256 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+
+#### SHA3
+Algorithm | Supported | Hardware acceleration |
+| -- | --------- | --------- |
 | SHA3-512 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 
 *⚠️ = Work in progress*
 *❌ = Not yet supported*
 
+---
+
 ### Additional algorithms
-TODO Base64
+Algorithm | Supported | Hardware acceleration |
+| -- | --------- | --------- |
+| Base64 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+
+*⚠️ = Work in progress*
+*❌ = Not yet supported*
+
+---
 
 ### Performance and Benchmarks
 #### ARMv8 (M1 Pro AppleSilicon)

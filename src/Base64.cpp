@@ -27,39 +27,10 @@ the following restrictions:
 /*                      (C) 2024 Marc Schöndorf                     */
 /*                            See license                           */
 /*                                                                  */
-/*  HasherBase.hpp                                                  */
-/*  Created: 26.06.2024                                             */
+/*  Base64_Software.cpp                                             */
+/*  Created: 18.07.2024                                             */
 /*------------------------------------------------------------------*/
 
-#ifndef HasherBase_hpp
-#define HasherBase_hpp
+#include "HashMe.hpp"
 
-namespace HashMe
-{
-
-// ***************************************************
-// Abstract hasher base class as our interface
-class HasherBase
-{
-protected:
-    HasherBase() = default;
-    virtual ~HasherBase() = default;
-    
-public:
-    HasherBase(const HasherBase& other) = delete;
-    HasherBase& operator=(const HasherBase& other) = delete;
-    const HasherBase& operator=(const HasherBase& other) const = delete;
-    
-    virtual void Initialize() = 0;
-    virtual void Reset() = 0;
-    
-    virtual void Update(const uint8_t* const data, const uint64_t size) = 0;
-    virtual void Update(const std::vector<uint8_t>& data) = 0;
-    virtual void Update(const std::string& str) = 0;
-    
-    [[nodiscard]] virtual std::vector<uint8_t> End() = 0;
-};
-
-}
-
-#endif /* HasherBase_hpp */
+using namespace HashMe;

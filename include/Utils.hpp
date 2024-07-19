@@ -97,6 +97,27 @@ constexpr inline uint32_t U8toU32<KEEP_ENDIANNESS>(const uint8_t data[4])
 }
 
 // ***************************************************
+// Convert eight bytes to 64 bit unsigned integer with optional endianness reversal
+template <typename EndiannessSetting>
+constexpr inline uint64_t U8toU64(const uint8_t data[8]);
+
+template <>
+constexpr inline uint64_t U8toU64<REVERSE_ENDIANNESS>(const uint8_t data[8])
+{
+    return (static_cast<uint64_t>(data[0]) << 56ULL) | (static_cast<uint64_t>(data[1]) << 48ULL) | (static_cast<uint64_t>(data[2]) << 40ULL) |
+        (static_cast<uint64_t>(data[3]) << 32ULL) | (static_cast<uint64_t>(data[4]) << 24ULL) | (static_cast<uint64_t>(data[5]) << 16ULL) |
+        (static_cast<uint64_t>(data[6]) << 8ULL) | (data[7]);
+}
+                                                                      
+template <>
+constexpr inline uint64_t U8toU64<KEEP_ENDIANNESS>(const uint8_t data[8])
+{
+    return (data[0]) | (static_cast<uint64_t>(data[1]) << 8ULL) | (static_cast<uint64_t>(data[2]) << 16ULL) | (static_cast<uint64_t>(data[3]) << 24ULL) |
+        (static_cast<uint64_t>(data[4]) << 32ULL) | (static_cast<uint64_t>(data[5]) << 40ULL) | (static_cast<uint64_t>(data[6]) << 48ULL) |
+        (static_cast<uint64_t>(data[7]) << 56ULL);
+}
+
+// ***************************************************
 // Convert 16 bit unsigned integer to two bytes with optional endianness reversal
 template <typename EndiannessSetting>
 constexpr inline void U16toU8(const uint16_t data, uint8_t out[2]);

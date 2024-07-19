@@ -454,6 +454,8 @@ void Hasher<SHA256, HARDWARE>::ProcessX86(const uint8_t* preparedData, uint64_t 
 
 void Hasher<SHA256, HARDWARE>::Update(const uint8_t* const data, const uint64_t size)
 {
+    // TODO: rewrite to support streaming
+    
     if(!data)
         throw std::invalid_argument("Data cannot be nullptr.");
     
