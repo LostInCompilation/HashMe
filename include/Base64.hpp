@@ -27,12 +27,12 @@ the following restrictions:
 /*                      (C) 2024 Marc Schöndorf                     */
 /*                            See license                           */
 /*                                                                  */
-/*  Base64_Software.hpp                                             */
+/*  Base64.hpp                                                      */
 /*  Created: 18.07.2024                                             */
 /*------------------------------------------------------------------*/
 
-#ifndef Base64_Software_hpp
-#define Base64_Software_hpp
+#ifndef Base64_hpp
+#define Base64_hpp
 
 class Base64
 {
@@ -46,4 +46,4 @@ public:
     
 };
 
-#endif /* Base64_Software_hpp */
+#endif /* Base64_hpp */

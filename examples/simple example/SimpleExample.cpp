@@ -79,13 +79,18 @@ std::vector<uint8_t>* bigData = nullptr; // Allocate on heap to prevent "Compile
 const std::string testString = "123";
 //const std::string testString = "12345678901234567890123456789012345678901234567890123456789012345"; // 65 chars
 
-// Hash results for checking
-static constexpr std::string_view testStringHashSHA224_expected = "78d8045d684abd2eece923758f3cd781489df3a48e1278982466017f";
-static constexpr std::string_view testStringHashSHA256_expected = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
-static constexpr std::string_view testStringHashMD5_expected = "202cb962ac59075b964b07152d234b70";
-static constexpr std::string_view testStringHashCRC16_expected = "ba04";
-static constexpr std::string_view testStringHashCRC32_expected = "884863d2";
-static constexpr std::string_view testStringHashCRC64_expected = "30232844071cc561";
+// ***************************************************
+// Hash results for checking "123"
+[[maybe_unused]] static constexpr std::string_view testStringHashSHA224_expected = "78d8045d684abd2eece923758f3cd781489df3a48e1278982466017f";
+[[maybe_unused]] static constexpr std::string_view testStringHashSHA256_expected = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
+[[maybe_unused]] static constexpr std::string_view testStringHashSHA512_expected = "3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2";
+[[maybe_unused]] static constexpr std::string_view testStringHashSHA384_expected = "9a0a82f0c0cf31470d7affede3406cc9aa8410671520b727044eda15b4c25532a9b5cd8aaf9cec4919d76255b6bfb00f";
+
+[[maybe_unused]] static constexpr std::string_view testStringHashMD5_expected = "202cb962ac59075b964b07152d234b70";
+
+[[maybe_unused]] static constexpr std::string_view testStringHashCRC16_expected = "ba04";
+[[maybe_unused]] static constexpr std::string_view testStringHashCRC32_expected = "884863d2";
+[[maybe_unused]] static constexpr std::string_view testStringHashCRC64_expected = "30232844071cc561";
 
 // Testing mode
 //#define TEST_BIG_DATA // Use big data for test
@@ -213,6 +218,68 @@ void SHA224_Hardware(picobench::state& s)
     SHA224_HardwareAverager.AddDatapoint(static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0));
 }
 PICOBENCH(SHA224_Hardware);
+
+// ***************************************************
+// SHA512 software implementation
+std::string SHA512_Software_Hash = "";
+Averager<double> SHA512_SoftwareAverager;
+void SHA512_Software(picobench::state& s)
+{
+    std::vector<uint8_t> hashResult;
+    Hasher<SHA512, SOFTWARE> hasher;
+    
+    for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
+    {
+        s.start_timer();
+        
+        hasher.Reset();
+        
+#ifdef TEST_BIG_DATA
+        hasher.Update(*bigData);
+#else
+        hasher.Update(testString);
+        //hasher.Update(longTestString);
+#endif
+        hashResult = hasher.End();
+        
+        s.stop_timer();
+    }
+    
+    SHA512_Software_Hash = Utils::HashToHexString(hashResult);
+    SHA512_SoftwareAverager.AddDatapoint(static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0));
+}
+PICOBENCH(SHA512_Software);
+
+// ***************************************************
+// SHA384 software implementation
+std::string SHA384_Software_Hash = "";
+Averager<double> SHA384_SoftwareAverager;
+void SHA384_Software(picobench::state& s)
+{
+    std::vector<uint8_t> hashResult;
+    Hasher<SHA384, SOFTWARE> hasher;
+    
+    for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
+    {
+        s.start_timer();
+        
+        hasher.Reset();
+        
+#ifdef TEST_BIG_DATA
+        hasher.Update(*bigData);
+#else
+        hasher.Update(testString);
+        //hasher.Update(longTestString);
+#endif
+        hashResult = hasher.End();
+        
+        s.stop_timer();
+    }
+    
+    SHA384_Software_Hash = Utils::HashToHexString(hashResult);
+    SHA384_SoftwareAverager.AddDatapoint(static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0));
+}
+PICOBENCH(SHA384_Software);
 
 // ***************************************************
 // MD5 software implementation
@@ -465,6 +532,7 @@ void PrintStartupHeader()
 // Print measured speed and computed hashes
 void PrintSpeedAndHash()
 {
+    // ***************************************************
     // SHA224
     std::cout << "***********************************************************" << std::endl;
     std::cout << "SHA224 (Software): " << std::fixed << std::setprecision(2) << SHA224_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
@@ -474,6 +542,7 @@ void PrintSpeedAndHash()
     std::cout << "SHA224 (Hardware): " << std::fixed << std::setprecision(2) << SHA224_HardwareAverager.GetAverage() << " MB/s" << std::endl;
     std::cout << "SHA224 (Hardware): " << SHA224_Hardware_Hash << std::endl << std::endl;
     
+    // ***************************************************
     // SHA256
     std::cout << "***********************************************************" << std::endl;
     std::cout << "SHA256 (Software): " << std::fixed << std::setprecision(2) << SHA256_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
@@ -483,11 +552,33 @@ void PrintSpeedAndHash()
     std::cout << "SHA256 (Hardware): " << std::fixed << std::setprecision(2) << SHA256_HardwareAverager.GetAverage() << " MB/s" << std::endl;
     std::cout << "SHA256 (Hardware): " << SHA256_Hardware_Hash << std::endl << std::endl;
     
+    // ***************************************************
+    // SHA512
+    std::cout << "***********************************************************" << std::endl;
+    std::cout << "SHA512 (Software): " << std::fixed << std::setprecision(2) << SHA512_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
+    std::cout << "SHA512 (Software): " << SHA512_Software_Hash << std::endl << std::endl;
+    
+//    std::cout << "***********************************************************" << std::endl;
+//    std::cout << "SHA512 (Hardware): " << std::fixed << std::setprecision(2) << SHA512_HardwareAverager.GetAverage() << " MB/s" << std::endl;
+//    std::cout << "SHA512 (Hardware): " << SHA512_Hardware_Hash << std::endl << std::endl;
+    
+    // ***************************************************
+    // SHA384
+    std::cout << "***********************************************************" << std::endl;
+    std::cout << "SHA384 (Software): " << std::fixed << std::setprecision(2) << SHA384_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
+    std::cout << "SHA384 (Software): " << SHA384_Software_Hash << std::endl << std::endl;
+    
+//    std::cout << "***********************************************************" << std::endl;
+//    std::cout << "SHA384 (Hardware): " << std::fixed << std::setprecision(2) << SHA384_HardwareAverager.GetAverage() << " MB/s" << std::endl;
+//    std::cout << "SHA384 (Hardware): " << SHA384_Hardware_Hash << std::endl << std::endl;
+    
+    // ***************************************************
     // MD5
     std::cout << "***********************************************************" << std::endl;
     std::cout << "MD5 (Software): " << std::fixed << std::setprecision(2) << MD5_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
     std::cout << "MD5 (Software): " << MD5_Software_Hash << std::endl << std::endl << std::endl;
     
+    // ***************************************************
     // CRC16
     std::cout << "***********************************************************" << std::endl;
     std::cout << "CRC16 (Software): " << std::fixed << std::setprecision(2) << CRC16_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
@@ -497,7 +588,8 @@ void PrintSpeedAndHash()
 //    std::cout << "CRC16 (Hardware): " << std::fixed << std::setprecision(2) << CRC32averager.GetAverage() << " MB/s" << std::endl;
 //    std::cout << "CRC16 (Hardware): " << CRC32_Hardware_Hash << std::endl << std::endl << std::endl;
 //    std::cout << "CRC16 (Hardware) Int32: " << CRC32_Hardware_Hash_Int32 << std::endl << std::endl << std::endl;
-//
+
+    // ***************************************************
     // CRC32
     std::cout << "***********************************************************" << std::endl;
     std::cout << "CRC32 (Software): " << std::fixed << std::setprecision(2) << CRC32_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
@@ -507,6 +599,7 @@ void PrintSpeedAndHash()
     std::cout << "CRC32 (Hardware): " << std::fixed << std::setprecision(2) << CRC32_HardwareAverager.GetAverage() << " MB/s" << std::endl;
     std::cout << "CRC32 (Hardware): " << CRC32_Hardware_Hash << std::endl << std::endl << std::endl;
     
+    // ***************************************************
     // CRC64
     std::cout << "***********************************************************" << std::endl;
     std::cout << "CRC64 (Software): " << std::fixed << std::setprecision(2) << CRC64_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
@@ -516,24 +609,33 @@ void PrintSpeedAndHash()
 //    std::cout << "CRC64 (Hardware): " << std::fixed << std::setprecision(2) << CRC64_HardwareAverager.GetAverage() << " MB/s" << std::endl;
 //    std::cout << "CRC64 (Hardware): " << CRC64_Hardware_Hash << std::endl << std::endl << std::endl;
     
+    // ***************************************************
+    // Check if generated hashes for "testString" are correct
 #ifndef TEST_BIG_DATA
-    // Check generated hashes for testString
+    // SHA
     assert(testStringHashSHA224_expected == SHA224_Software_Hash);
     assert(testStringHashSHA224_expected == SHA224_Hardware_Hash);
     
     assert(testStringHashSHA256_expected == SHA256_Software_Hash);
     assert(testStringHashSHA256_expected == SHA256_Hardware_Hash);
     
-    assert(testStringHashMD5_expected == MD5_Software_Hash);
+    assert(testStringHashSHA512_expected == SHA512_Software_Hash);
+    //assert(testStringHashSHA512_expected == SHA512_Hardware_Hash);
     
+    assert(testStringHashSHA384_expected == SHA384_Software_Hash);
+    //assert(testStringHashSHA384_expected == SHA384_Hardware_Hash);
+    
+    // MD5
+    assert(testStringHashMD5_expected == MD5_Software_Hash);
+    //assert(testStringHashMD5_expected == MD5_Hardware_Hash);
+    
+    // CRC
     assert(testStringHashCRC16_expected == CRC16_Software_Hash);
     //assert(testStringHashCRC16_expected == CRC16_Hardware_Hash);
-    
     assert(testStringHashCRC32_expected == CRC32_Software_Hash);
     assert(testStringHashCRC32_expected == CRC32_Hardware_Hash);
-    
     assert(testStringHashCRC64_expected == CRC64_Software_Hash);
-//    assert(testStringHashCRC64_expected == CRC64_Hardware_Hash);
+    //assert(testStringHashCRC64_expected == CRC64_Hardware_Hash);
 #endif
 }
 
@@ -577,21 +679,15 @@ void PrintPredefInfo()
 
 int main()
 {
-//    Hasher<CRC16, SOFTWARE> crc16_software;
-//    crc16_software.Update("123");
-//    //crc16_software.Update("456");
-//    std::cout << "CRC16 two step (software): " << Utils::HashToHexString(crc16_software.End()) << std::endl;
-    
+    //Hasher<CRC16, SOFTWARE> crc16_software;
+    //crc16_software.Update("123");
+    //crc16_software.Update("456");
+    //std::cout << "CRC16 two step (software): " << Utils::HashToHexString(crc16_software.End()) << std::endl;
     
 //    Hasher<CRC64, SOFTWARE> crc64_software;
 //    crc64_software.Update("123");
 //    //crc64_software.Update("456");
 //    std::cout << "CRC64 two step (software): " << Utils::HashToHexString(crc64_software.End()) << std::endl;
-    
-    Hasher<SHA256, HARDWARE> hasher;
-    hasher.Update("123");
-    hasher.End();
-    
     
     // ***************************************************
     // Print startup header

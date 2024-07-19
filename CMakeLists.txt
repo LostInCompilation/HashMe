@@ -47,19 +47,25 @@ add_library("${PROJECT_NAME}"
 	include/HashMe.hpp
 	include/Utils.hpp
 	include/HasherBase.hpp
+	include/Base64.hpp
 	include/SHA256.hpp
 	include/SHA256_Hardware.hpp
 	include/SHA224.hpp
 	include/SHA224_Hardware.hpp
+	include/SHA512.hpp
+	include/SHA384.hpp
 	include/MD5.hpp
 	include/CRC_Software.hpp
 	include/CRC32_Hardware.hpp
 	src/HashMe.cpp
 	src/Utils.cpp
+	src/Base64.cpp
 	src/SHA256.cpp
 	src/SHA256_Hardware.cpp
 	src/SHA224.cpp
 	src/SHA224_Hardware.cpp
+	src/SHA512.cpp
+	src/SHA384.cpp
 	src/MD5.cpp
 	src/CRC_Software.cpp
 	src/CRC32_Hardware.cpp
@@ -116,7 +122,7 @@ if (WIN32)
 	if (MSVC)
 		RemoveRTCFlagDebug_VS()
 		RemoveRTCFlagRelease_VS()
-		
+
 		target_compile_options("${PROJECT_NAME}" PRIVATE "/W3")
 		#target_compile_options("${PROJECT_NAME}" PRIVATE "/WX")
 		#target_compile_options("${PROJECT_NAME}" PRIVATE "/wd4244")

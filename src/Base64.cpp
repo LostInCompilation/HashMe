@@ -27,7 +27,7 @@ the following restrictions:
 /*                      (C) 2024 Marc Schöndorf                     */
 /*                            See license                           */
 /*                                                                  */
-/*  Base64_Software.cpp                                             */
+/*  Base64.cpp                                                      */
 /*  Created: 18.07.2024                                             */
 /*------------------------------------------------------------------*/
 

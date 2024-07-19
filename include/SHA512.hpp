@@ -27,7 +27,7 @@ the following restrictions:
 /*                      (C) 2024 Marc Schöndorf                     */
 /*                            See license                           */
 /*                                                                  */
-/*  SHA512_Software.hpp                                             */
+/*  SHA512.hpp                                                      */
 /*  Created: 18.07.2024                                             */
 /*------------------------------------------------------------------*/
 
