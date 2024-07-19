@@ -160,34 +160,54 @@ void Hasher<SHA256, SOFTWARE>::Update(const uint8_t* const data, const uint64_t 
         throw std::invalid_argument("Data size cannot be zero.");
     
     uint64_t dataIndex = 0;
-    const uint32_t lastBlockSize = size & (SHA256_BLOCK_LENGTH - 1); // size % SHA256_BLOCK_LENGTH
+    uint64_t remainingBytes = size;
     
-    // Fill buffer with SHA256_BLOCK_LENGTH bytes
-    while(dataIndex < size)
+    while(remainingBytes > 0)
     {
-        if((size - dataIndex) >= SHA256_BLOCK_LENGTH)
+        if(m_Context->bufferSize > 0)
         {
-            // Copy one whole block and transform it
-            std::copy(data + dataIndex, data + dataIndex + SHA256_BLOCK_LENGTH, m_Context->buffer);
-            m_Context->bufferSize += SHA256_BLOCK_LENGTH;
+            // Buffer is already partially filled and untransformed
+            const uint32_t remainingBufferSpace = SHA256_BLOCK_LENGTH - m_Context->bufferSize;
+            const uint32_t bytesToCopy = (remainingBytes > remainingBufferSpace) ? remainingBufferSpace : static_cast<uint32_t>(remainingBytes);
             
-            // Transform
-            Transform(m_Context->buffer);
+            // Copy
+            std::copy(data + dataIndex, data + dataIndex + bytesToCopy, m_Context->buffer + m_Context->bufferSize);
+            m_Context->bufferSize += bytesToCopy;
+            m_Context->numOfBits += (bytesToCopy << 3);
+            dataIndex += bytesToCopy;
+            remainingBytes -= bytesToCopy;
             
-            m_Context->bufferSize = 0;
-            m_Context->numOfBits += 512;
-            
-            dataIndex += SHA256_BLOCK_LENGTH;
+            // Check if buffer is completely filled now
+            if(m_Context->bufferSize == SHA256_BLOCK_LENGTH)
+            {
+                // Buffer is full, transform it now
+                Transform(m_Context->buffer);
+                m_Context->bufferSize = 0;
+            }
         }
         else
         {
-            // Copy partial (last) block to buffer, transform it inside the End() method
-            std::copy(data + dataIndex, data + dataIndex + lastBlockSize, m_Context->buffer);
-            m_Context->bufferSize += lastBlockSize;
-            
-            // End loop
-            //dataIndex += lastBlockSize;
-            break;
+            // Buffer is empty
+            if(remainingBytes >= SHA256_BLOCK_LENGTH)
+            {
+                // Copy one whole block in empty buffer and transform it
+                std::copy(data + dataIndex, data + dataIndex + SHA256_BLOCK_LENGTH, m_Context->buffer);
+                m_Context->numOfBits += 512;
+                dataIndex += SHA256_BLOCK_LENGTH;
+                remainingBytes -= SHA256_BLOCK_LENGTH;
+                
+                // Transform
+                Transform(m_Context->buffer);
+            }
+            else
+            {
+                // Copy partial (last) block to buffer, transform it inside the End() method
+                std::copy(data + dataIndex, data + dataIndex + remainingBytes, m_Context->buffer);
+                m_Context->bufferSize += remainingBytes;
+                m_Context->numOfBits += (m_Context->bufferSize << 3);
+                //dataIndex += remainingBytes;
+                remainingBytes = 0; // Terminate loop
+            }
         }
     }
 }
@@ -204,33 +224,36 @@ void Hasher<SHA256, SOFTWARE>::Update(const std::string& str)
 
 std::vector<uint8_t> Hasher<SHA256, SOFTWARE>::End()
 {
+#ifndef NDEBUG
+    if(m_Context->bufferSize == SHA256_BLOCK_LENGTH) // Check for bug
+        throw std::runtime_error("Buffer should never be completely filled and untransformed when entering the End() function.");
+#endif
+    
     // Pad last block
-    if(m_Context->bufferSize < 56)
+    if(m_Context->bufferSize < SHA256_BLOCK_LENGTH - 8)
     {
-        std::memset(&m_Context->buffer[m_Context->bufferSize], 0x00, 56 - m_Context->bufferSize);
+        std::memset(m_Context->buffer + m_Context->bufferSize, 0x00, SHA256_BLOCK_LENGTH - 8 - m_Context->bufferSize);
         m_Context->buffer[m_Context->bufferSize] = 0x80;
     }
     else
     {
-        std::memset(&m_Context->buffer[m_Context->bufferSize], 0x00, 64 - m_Context->bufferSize);
+        std::memset(m_Context->buffer + m_Context->bufferSize, 0x00, SHA256_BLOCK_LENGTH - m_Context->bufferSize);
         m_Context->buffer[m_Context->bufferSize] = 0x80;
         
         Transform(m_Context->buffer);
         
-        std::memset(m_Context->buffer, 0x00, 56);
+        std::memset(m_Context->buffer, 0x00, SHA256_BLOCK_LENGTH - 8);
     }
     
-    // Append message length in bits
-    m_Context->numOfBits += (m_Context->bufferSize << 3); // bufferSize * 8
-    
-    m_Context->buffer[63] = static_cast<uint8_t>(m_Context->numOfBits);
-    m_Context->buffer[62] = static_cast<uint8_t>(m_Context->numOfBits >> 8);
-    m_Context->buffer[61] = static_cast<uint8_t>(m_Context->numOfBits >> 16);
-    m_Context->buffer[60] = static_cast<uint8_t>(m_Context->numOfBits >> 24);
-    m_Context->buffer[59] = static_cast<uint8_t>(m_Context->numOfBits >> 32);
-    m_Context->buffer[58] = static_cast<uint8_t>(m_Context->numOfBits >> 40);
-    m_Context->buffer[57] = static_cast<uint8_t>(m_Context->numOfBits >> 48);
-    m_Context->buffer[56] = static_cast<uint8_t>(m_Context->numOfBits >> 56);
+    // Append full message length to padding block
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 1] = static_cast<uint8_t>(m_Context->numOfBits);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 2] = static_cast<uint8_t>(m_Context->numOfBits >> 8);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 3] = static_cast<uint8_t>(m_Context->numOfBits >> 16);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 4] = static_cast<uint8_t>(m_Context->numOfBits >> 24);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 5] = static_cast<uint8_t>(m_Context->numOfBits >> 32);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 6] = static_cast<uint8_t>(m_Context->numOfBits >> 40);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 7] = static_cast<uint8_t>(m_Context->numOfBits >> 48);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 8] = static_cast<uint8_t>(m_Context->numOfBits >> 56);
     
     // Transform
     Transform(m_Context->buffer);
