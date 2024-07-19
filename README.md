@@ -48,20 +48,16 @@ Algorithm | Supported | Hardware acceleration |
 | MD5 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | MD6 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 
-#### SHA1 & SHA2
+#### SHA
 Algorithm | Supported | Hardware acceleration |
 | -- | --------- | --------- |
 | SHA1 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA224 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA256 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
-| SHA384 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| SHA384 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA512 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA512/224 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA512/256 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
-
-#### SHA3
-Algorithm | Supported | Hardware acceleration |
-| -- | --------- | --------- |
 | SHA3-512 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 
 *⚠️ = Work in progress*
@@ -80,22 +76,38 @@ Algorithm | Supported | Hardware acceleration |
 ---
 
 ### Performance and Benchmarks
+
 #### ARMv8 (M1 Pro AppleSilicon)
+*Apple Clang, Release build, -O3 optimization*
+
+#### CRC
 Algorithm      |   Speed (MB/s)
 ---------------|--------:
 CRC16 Software | 375.54 MB/s
 CRC16 Hardware (SIMD) | xxx MB/s
-CRC32 Software | 373.10 MB/s
+CRC32 Software | 376.49 MB/s
 CRC32 Hardware (SIMD) | 8031.77 MB/s
+CRC64 Software | 378.56 MB/s
+CRC64 Hardware (SIMD) | xxx MB/s
+
+#### MD
+Algorithm      |   Speed (MB/s)
+---------------|--------:
 MD5 Software | 538.12 MB/s
-MD5 Hardware (SIMD) | XXX MB/s
+MD5 Hardware (SIMD) | xxx MB/s
+
+#### SHA
+Algorithm      |   Speed (MB/s)
+---------------|--------:
 SHA224 Software | 218.50 MB/s
-SHA224 Hardware (SIMD) | 1644.54 MB/s
+SHA224 Hardware (SIMD) | 1944.76 MB/s
 SHA256 Software | 217.76 MB/s
-SHA256 Hardware (SIMD) | 1644.86 MB/s
+SHA256 Hardware (SIMD) | 1944.79 MB/s
+SHA384 Software | 317.07 MB/s
+SHA384 Hardware (SIMD) | xxx MB/s
+SHA512 Software | 317.10 MB/s
+SHA512 Hardware (SIMD) | xxx MB/s
 
-
-*Apple Clang, Release build, -O3 optimization*
 
 #### x86_64 (Intel)
 **TODO**

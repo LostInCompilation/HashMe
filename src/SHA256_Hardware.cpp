@@ -37,222 +37,169 @@ the following restrictions:
 
 using namespace HashMe;
 
-Hasher<SHA256, HARDWARE>::Hasher()
+Hasher<SHA256, HARDWARE>::Hasher(const Hasher& other) : Hasher<SHA256, SOFTWARE>(other)
 {
-    Initialize();
-}
-
-Hasher<SHA256, HARDWARE>::Hasher(const Hasher& other)
-{
-    std::copy(other.m_State, other.m_State + 8, m_State);
-}
-
-void Hasher<SHA256, HARDWARE>::Initialize()
-{
-    // Set state to initial hash values
-    std::copy(INITIAL_HASH_VALUES.begin(), INITIAL_HASH_VALUES.end(), m_State);
-}
-
-void Hasher<SHA256, HARDWARE>::Reset()
-{
-    Initialize();
-}
-
-// Prepare data with padding
-uint64_t Hasher<SHA256, HARDWARE>::PrepareData(const uint8_t* const data, const uint64_t size, uint8_t** const preparedData)
-{
-    const uint64_t dataSizeInBits = size << 3; // size * 8
-    const uint64_t paddingSize = (512ULL - ((dataSizeInBits + 1ULL + 64ULL) & 0x1FF)) >> 3; // (& 0x1FF) = (mod 512)
-    const uint64_t preparedDataSize = (1ULL + paddingSize + 8ULL) + size; // paddingSize + size
-    
-    // Allocate memory for data and padding
-    *preparedData = new uint8_t[preparedDataSize]{0}; // Zero fill
-    
-    // Copy data to new array
-    std::copy(data, data + size, *preparedData);
-    
-    // Append padding after data. Add a 1 at beginning and append n zero bits
-    (*preparedData)[size] = 0x80;
-    
-    // Append data size (uint64_t as big endian) to the end of array
-    const uint64_t index = 1ULL + paddingSize + size;
-    (*preparedData)[index + 7] = static_cast<uint8_t>(dataSizeInBits); // Unsigned integer cast discards unused bits
-    (*preparedData)[index + 6] = static_cast<uint8_t>(dataSizeInBits >> 8);
-    (*preparedData)[index + 5] = static_cast<uint8_t>(dataSizeInBits >> 16);
-    (*preparedData)[index + 4] = static_cast<uint8_t>(dataSizeInBits >> 24);
-    (*preparedData)[index + 3] = static_cast<uint8_t>(dataSizeInBits >> 32);
-    (*preparedData)[index + 2] = static_cast<uint8_t>(dataSizeInBits >> 40);
-    (*preparedData)[index + 1] = static_cast<uint8_t>(dataSizeInBits >> 48);
-    (*preparedData)[index] = static_cast<uint8_t>(dataSizeInBits >> 56);
-    
-    return preparedDataSize;
 }
 
 #if defined(HM_SIMD_ARM)
-void Hasher<SHA256, HARDWARE>::ProcessARM(const uint8_t* preparedData, uint64_t size)
+void Hasher<SHA256, HARDWARE>::TransformARM(const uint8_t* const data)
 {
     uint32x4_t STATE0, STATE1, ABCD_SAVE, EFGH_SAVE;
     uint32x4_t MSG0, MSG1, MSG2, MSG3;
     uint32x4_t TMP0, TMP1, TMP2;
     
     // Load initial state
-    STATE0 = vld1q_u32(&m_State[0]);
-    STATE1 = vld1q_u32(&m_State[4]);
+    STATE0 = vld1q_u32(&m_Context->state[0]);
+    STATE1 = vld1q_u32(&m_Context->state[4]);
     
-    while (size >= 64)
-    {
-        // Save current state
-        ABCD_SAVE = STATE0;
-        EFGH_SAVE = STATE1;
+    // Save current state
+    ABCD_SAVE = STATE0;
+    EFGH_SAVE = STATE1;
 
-        // Load data
-        MSG0 = vld1q_u32(reinterpret_cast<const uint32_t*>(preparedData +  0));
-        MSG1 = vld1q_u32(reinterpret_cast<const uint32_t*>(preparedData + 16));
-        MSG2 = vld1q_u32(reinterpret_cast<const uint32_t*>(preparedData + 32));
-        MSG3 = vld1q_u32(reinterpret_cast<const uint32_t*>(preparedData + 48));
+    // Load data
+    MSG0 = vld1q_u32(reinterpret_cast<const uint32_t*>(data +  0));
+    MSG1 = vld1q_u32(reinterpret_cast<const uint32_t*>(data + 16));
+    MSG2 = vld1q_u32(reinterpret_cast<const uint32_t*>(data + 32));
+    MSG3 = vld1q_u32(reinterpret_cast<const uint32_t*>(data + 48));
 
 #ifdef HM_LITTLE_ENDIAN // Reverse byte order if host is little endian to match SHA256 big endian requirement
-        MSG0 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG0)));
-        MSG1 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG1)));
-        MSG2 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG2)));
-        MSG3 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG3)));
+    MSG0 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG0)));
+    MSG1 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG1)));
+    MSG2 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG2)));
+    MSG3 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG3)));
 #endif
-        
-        TMP0 = vaddq_u32(MSG0, vld1q_u32(&K[0x00]));
-
-        // Rounds 0-3
-        MSG0 = vsha256su0q_u32(MSG0, MSG1);
-        TMP2 = STATE0;
-        TMP1 = vaddq_u32(MSG1, vld1q_u32(&K[0x04]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
-        MSG0 = vsha256su1q_u32(MSG0, MSG2, MSG3);
-
-        // Rounds 4-7
-        MSG1 = vsha256su0q_u32(MSG1, MSG2);
-        TMP2 = STATE0;
-        TMP0 = vaddq_u32(MSG2, vld1q_u32(&K[0x08]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
-        MSG1 = vsha256su1q_u32(MSG1, MSG3, MSG0);
-
-        // Rounds 8-11
-        MSG2 = vsha256su0q_u32(MSG2, MSG3);
-        TMP2 = STATE0;
-        TMP1 = vaddq_u32(MSG3, vld1q_u32(&K[0x0c]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
-        MSG2 = vsha256su1q_u32(MSG2, MSG0, MSG1);
-
-        // Rounds 12-15
-        MSG3 = vsha256su0q_u32(MSG3, MSG0);
-        TMP2 = STATE0;
-        TMP0 = vaddq_u32(MSG0, vld1q_u32(&K[0x10]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
-        MSG3 = vsha256su1q_u32(MSG3, MSG1, MSG2);
-
-        // Rounds 16-19
-        MSG0 = vsha256su0q_u32(MSG0, MSG1);
-        TMP2 = STATE0;
-        TMP1 = vaddq_u32(MSG1, vld1q_u32(&K[0x14]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
-        MSG0 = vsha256su1q_u32(MSG0, MSG2, MSG3);
-
-        // Rounds 20-23
-        MSG1 = vsha256su0q_u32(MSG1, MSG2);
-        TMP2 = STATE0;
-        TMP0 = vaddq_u32(MSG2, vld1q_u32(&K[0x18]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
-        MSG1 = vsha256su1q_u32(MSG1, MSG3, MSG0);
-
-        // Rounds 24-27
-        MSG2 = vsha256su0q_u32(MSG2, MSG3);
-        TMP2 = STATE0;
-        TMP1 = vaddq_u32(MSG3, vld1q_u32(&K[0x1c]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
-        MSG2 = vsha256su1q_u32(MSG2, MSG0, MSG1);
-
-        // Rounds 28-31
-        MSG3 = vsha256su0q_u32(MSG3, MSG0);
-        TMP2 = STATE0;
-        TMP0 = vaddq_u32(MSG0, vld1q_u32(&K[0x20]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
-        MSG3 = vsha256su1q_u32(MSG3, MSG1, MSG2);
-
-        // Rounds 32-35
-        MSG0 = vsha256su0q_u32(MSG0, MSG1);
-        TMP2 = STATE0;
-        TMP1 = vaddq_u32(MSG1, vld1q_u32(&K[0x24]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
-        MSG0 = vsha256su1q_u32(MSG0, MSG2, MSG3);
-
-        // Rounds 36-39
-        MSG1 = vsha256su0q_u32(MSG1, MSG2);
-        TMP2 = STATE0;
-        TMP0 = vaddq_u32(MSG2, vld1q_u32(&K[0x28]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
-        MSG1 = vsha256su1q_u32(MSG1, MSG3, MSG0);
-
-        // Rounds 40-43
-        MSG2 = vsha256su0q_u32(MSG2, MSG3);
-        TMP2 = STATE0;
-        TMP1 = vaddq_u32(MSG3, vld1q_u32(&K[0x2c]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
-        MSG2 = vsha256su1q_u32(MSG2, MSG0, MSG1);
-
-        // Rounds 44-47
-        MSG3 = vsha256su0q_u32(MSG3, MSG0);
-        TMP2 = STATE0;
-        TMP0 = vaddq_u32(MSG0, vld1q_u32(&K[0x30]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
-        MSG3 = vsha256su1q_u32(MSG3, MSG1, MSG2);
-
-        // Rounds 48-51
-        TMP2 = STATE0;
-        TMP1 = vaddq_u32(MSG1, vld1q_u32(&K[0x34]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
-
-        // Rounds 52-55
-        TMP2 = STATE0;
-        TMP0 = vaddq_u32(MSG2, vld1q_u32(&K[0x38]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
-
-        // Rounds 56-59
-        TMP2 = STATE0;
-        TMP1 = vaddq_u32(MSG3, vld1q_u32(&K[0x3c]));
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
-
-        // Rounds 60-63
-        TMP2 = STATE0;
-        STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
-        STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
-
-        // Combine states
-        STATE0 = vaddq_u32(STATE0, ABCD_SAVE);
-        STATE1 = vaddq_u32(STATE1, EFGH_SAVE);
-
-        preparedData += 64;
-        size -= 64;
-    }
     
+    TMP0 = vaddq_u32(MSG0, vld1q_u32(&K[0x00]));
+
+    // Rounds 0-3
+    MSG0 = vsha256su0q_u32(MSG0, MSG1);
+    TMP2 = STATE0;
+    TMP1 = vaddq_u32(MSG1, vld1q_u32(&K[0x04]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
+    MSG0 = vsha256su1q_u32(MSG0, MSG2, MSG3);
+
+    // Rounds 4-7
+    MSG1 = vsha256su0q_u32(MSG1, MSG2);
+    TMP2 = STATE0;
+    TMP0 = vaddq_u32(MSG2, vld1q_u32(&K[0x08]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
+    MSG1 = vsha256su1q_u32(MSG1, MSG3, MSG0);
+
+    // Rounds 8-11
+    MSG2 = vsha256su0q_u32(MSG2, MSG3);
+    TMP2 = STATE0;
+    TMP1 = vaddq_u32(MSG3, vld1q_u32(&K[0x0c]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
+    MSG2 = vsha256su1q_u32(MSG2, MSG0, MSG1);
+
+    // Rounds 12-15
+    MSG3 = vsha256su0q_u32(MSG3, MSG0);
+    TMP2 = STATE0;
+    TMP0 = vaddq_u32(MSG0, vld1q_u32(&K[0x10]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
+    MSG3 = vsha256su1q_u32(MSG3, MSG1, MSG2);
+
+    // Rounds 16-19
+    MSG0 = vsha256su0q_u32(MSG0, MSG1);
+    TMP2 = STATE0;
+    TMP1 = vaddq_u32(MSG1, vld1q_u32(&K[0x14]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
+    MSG0 = vsha256su1q_u32(MSG0, MSG2, MSG3);
+
+    // Rounds 20-23
+    MSG1 = vsha256su0q_u32(MSG1, MSG2);
+    TMP2 = STATE0;
+    TMP0 = vaddq_u32(MSG2, vld1q_u32(&K[0x18]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
+    MSG1 = vsha256su1q_u32(MSG1, MSG3, MSG0);
+
+    // Rounds 24-27
+    MSG2 = vsha256su0q_u32(MSG2, MSG3);
+    TMP2 = STATE0;
+    TMP1 = vaddq_u32(MSG3, vld1q_u32(&K[0x1c]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
+    MSG2 = vsha256su1q_u32(MSG2, MSG0, MSG1);
+
+    // Rounds 28-31
+    MSG3 = vsha256su0q_u32(MSG3, MSG0);
+    TMP2 = STATE0;
+    TMP0 = vaddq_u32(MSG0, vld1q_u32(&K[0x20]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
+    MSG3 = vsha256su1q_u32(MSG3, MSG1, MSG2);
+
+    // Rounds 32-35
+    MSG0 = vsha256su0q_u32(MSG0, MSG1);
+    TMP2 = STATE0;
+    TMP1 = vaddq_u32(MSG1, vld1q_u32(&K[0x24]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
+    MSG0 = vsha256su1q_u32(MSG0, MSG2, MSG3);
+
+    // Rounds 36-39
+    MSG1 = vsha256su0q_u32(MSG1, MSG2);
+    TMP2 = STATE0;
+    TMP0 = vaddq_u32(MSG2, vld1q_u32(&K[0x28]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
+    MSG1 = vsha256su1q_u32(MSG1, MSG3, MSG0);
+
+    // Rounds 40-43
+    MSG2 = vsha256su0q_u32(MSG2, MSG3);
+    TMP2 = STATE0;
+    TMP1 = vaddq_u32(MSG3, vld1q_u32(&K[0x2c]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
+    MSG2 = vsha256su1q_u32(MSG2, MSG0, MSG1);
+
+    // Rounds 44-47
+    MSG3 = vsha256su0q_u32(MSG3, MSG0);
+    TMP2 = STATE0;
+    TMP0 = vaddq_u32(MSG0, vld1q_u32(&K[0x30]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
+    MSG3 = vsha256su1q_u32(MSG3, MSG1, MSG2);
+
+    // Rounds 48-51
+    TMP2 = STATE0;
+    TMP1 = vaddq_u32(MSG1, vld1q_u32(&K[0x34]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
+
+    // Rounds 52-55
+    TMP2 = STATE0;
+    TMP0 = vaddq_u32(MSG2, vld1q_u32(&K[0x38]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
+
+    // Rounds 56-59
+    TMP2 = STATE0;
+    TMP1 = vaddq_u32(MSG3, vld1q_u32(&K[0x3c]));
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP0);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP0);
+
+    // Rounds 60-63
+    TMP2 = STATE0;
+    STATE0 = vsha256hq_u32(STATE0, STATE1, TMP1);
+    STATE1 = vsha256h2q_u32(STATE1, TMP2, TMP1);
+
+    // Combine states
+    STATE0 = vaddq_u32(STATE0, ABCD_SAVE);
+    STATE1 = vaddq_u32(STATE1, EFGH_SAVE);
+
     // Save the new state
-    vst1q_u32(&m_State[0], STATE0);
-    vst1q_u32(&m_State[4], STATE1);
+    vst1q_u32(&m_Context->state[0], STATE0);
+    vst1q_u32(&m_Context->state[4], STATE1);
 }
 #elif defined(HM_SIMD_X86)
-void Hasher<SHA256, HARDWARE>::ProcessX86(const uint8_t* preparedData, uint64_t size)
+void Hasher<SHA256, HARDWARE>::TransformX86(const uint8_t* const data)
 {
     __m128i STATE0, STATE1;
     __m128i MSG, TMP;
@@ -261,15 +208,15 @@ void Hasher<SHA256, HARDWARE>::ProcessX86(const uint8_t* preparedData, uint64_t 
     const __m128i MASK = _mm_set_epi64x(0x0c0d0e0f08090a0bULL, 0x0405060700010203ULL);
 
     // Load initial values from state
-    TMP = _mm_loadu_si128(reinterpret_cast<const __m128i*>(&m_State[0]));
-    STATE1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(&m_State[4]));
+    TMP = _mm_loadu_si128(reinterpret_cast<const __m128i*>(&m_Context->state[0]));
+    STATE1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(&m_Context->state[4]));
 
     TMP = _mm_shuffle_epi32(TMP, 0xB1);          // CDAB
     STATE1 = _mm_shuffle_epi32(STATE1, 0x1B);    // EFGH
     STATE0 = _mm_alignr_epi8(TMP, STATE1, 8);    // ABEF
     STATE1 = _mm_blend_epi16(STATE1, TMP, 0xF0); // CDGH
 
-    while (size >= 64)
+    //while (size >= 64)
     {
         // Save current state
         ABEF_SAVE = STATE0;
@@ -437,8 +384,8 @@ void Hasher<SHA256, HARDWARE>::ProcessX86(const uint8_t* preparedData, uint64_t 
         STATE0 = _mm_add_epi32(STATE0, ABEF_SAVE);
         STATE1 = _mm_add_epi32(STATE1, CDGH_SAVE);
 
-        preparedData += 64;
-        size -= 64;
+        //preparedData += 64;
+        //size -= 64;
     }
 
     TMP = _mm_shuffle_epi32(STATE0, 0x1B);       // FEBA
@@ -447,33 +394,79 @@ void Hasher<SHA256, HARDWARE>::ProcessX86(const uint8_t* preparedData, uint64_t 
     STATE1 = _mm_alignr_epi8(STATE1, TMP, 8);    // ABEF
 
     // Save the new state
-    _mm_storeu_si128(reinterpret_cast<__m128i*>(&m_State[0]), STATE0);
-    _mm_storeu_si128(reinterpret_cast<__m128i*>(&m_State[4]), STATE1);
+    _mm_storeu_si128(reinterpret_cast<__m128i*>(&m_Context->state[0]), STATE0);
+    _mm_storeu_si128(reinterpret_cast<__m128i*>(&m_Context->state[4]), STATE1);
 }
 #endif
 
+void Hasher<SHA256, HARDWARE>::Transform(const uint8_t* const data)
+{
+#if defined(HM_SIMD_ARM)
+    TransformARM(data);
+#elif defined(HM_SIMD_X86)
+    TransformX86(data);
+#endif
+}
+
 void Hasher<SHA256, HARDWARE>::Update(const uint8_t* const data, const uint64_t size)
 {
-    // TODO: rewrite to support streaming
-    
     if(!data)
         throw std::invalid_argument("Data cannot be nullptr.");
     
     if(size == 0)
         throw std::invalid_argument("Data size cannot be zero.");
     
-    // Prepare data
-    uint8_t* preparedData = nullptr; // Will be allocated inside PrepareData
-    const uint64_t preparedDataSize = PrepareData(data, size, &preparedData);
+    uint64_t dataIndex = 0;
+    uint64_t remainingBytes = size;
     
-    // Process preparedData
-#if defined(HM_SIMD_ARM)
-    ProcessARM(preparedData, preparedDataSize);
-#elif defined(HM_SIMD_X86)
-    ProcessX86(preparedData, preparedDataSize);
-#endif
-    
-    delete[] preparedData;
+    while(remainingBytes > 0)
+    {
+        if(m_Context->bufferSize > 0)
+        {
+            // Buffer is already partially filled and untransformed
+            const uint32_t remainingBufferSpace = SHA256_BLOCK_LENGTH - m_Context->bufferSize;
+            const uint32_t bytesToCopy = (remainingBytes > remainingBufferSpace) ? remainingBufferSpace : static_cast<uint32_t>(remainingBytes);
+            
+            // Copy
+            std::copy(data + dataIndex, data + dataIndex + bytesToCopy, m_Context->buffer + m_Context->bufferSize);
+            m_Context->bufferSize += bytesToCopy;
+            m_Context->numOfBits += (bytesToCopy << 3);
+            dataIndex += bytesToCopy;
+            remainingBytes -= bytesToCopy;
+            
+            // Check if buffer is completely filled now
+            if(m_Context->bufferSize == SHA256_BLOCK_LENGTH)
+            {
+                // Buffer is full, transform it now
+                Transform(m_Context->buffer);
+                m_Context->bufferSize = 0;
+            }
+        }
+        else
+        {
+            // Buffer is empty
+            if(remainingBytes >= SHA256_BLOCK_LENGTH)
+            {
+                // Copy one whole block in empty buffer and transform it
+                std::copy(data + dataIndex, data + dataIndex + SHA256_BLOCK_LENGTH, m_Context->buffer);
+                m_Context->numOfBits += 512;
+                dataIndex += SHA256_BLOCK_LENGTH;
+                remainingBytes -= SHA256_BLOCK_LENGTH;
+                
+                // Transform
+                Transform(m_Context->buffer);
+            }
+            else
+            {
+                // Copy partial (last) block to buffer, transform it inside the End() method
+                std::copy(data + dataIndex, data + dataIndex + remainingBytes, m_Context->buffer);
+                m_Context->bufferSize += remainingBytes;
+                m_Context->numOfBits += (m_Context->bufferSize << 3);
+                //dataIndex += remainingBytes;
+                remainingBytes = 0; // Terminate loop
+            }
+        }
+    }
 }
 
 void Hasher<SHA256, HARDWARE>::Update(const std::vector<uint8_t>& data)
@@ -488,15 +481,48 @@ void Hasher<SHA256, HARDWARE>::Update(const std::string& str)
 
 std::vector<uint8_t> Hasher<SHA256, HARDWARE>::End()
 {
-    std::vector<uint8_t> hash(32); // 256 bit hash
+#ifndef NDEBUG
+    if(m_Context->bufferSize == SHA256_BLOCK_LENGTH) // Check for bug
+        throw std::runtime_error("Buffer should never be completely filled and untransformed when entering the End() function.");
+#endif
+    
+    // Pad last block
+    if(m_Context->bufferSize < SHA256_BLOCK_LENGTH - 8)
+    {
+        std::memset(m_Context->buffer + m_Context->bufferSize, 0x00, SHA256_BLOCK_LENGTH - 8 - m_Context->bufferSize);
+        m_Context->buffer[m_Context->bufferSize] = 0x80;
+    }
+    else
+    {
+        std::memset(m_Context->buffer + m_Context->bufferSize, 0x00, SHA256_BLOCK_LENGTH - m_Context->bufferSize);
+        m_Context->buffer[m_Context->bufferSize] = 0x80;
+        
+        Transform(m_Context->buffer);
+        
+        std::memset(m_Context->buffer, 0x00, SHA256_BLOCK_LENGTH - 8);
+    }
+    
+    // Append full message length to padding block
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 1] = static_cast<uint8_t>(m_Context->numOfBits);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 2] = static_cast<uint8_t>(m_Context->numOfBits >> 8);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 3] = static_cast<uint8_t>(m_Context->numOfBits >> 16);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 4] = static_cast<uint8_t>(m_Context->numOfBits >> 24);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 5] = static_cast<uint8_t>(m_Context->numOfBits >> 32);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 6] = static_cast<uint8_t>(m_Context->numOfBits >> 40);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 7] = static_cast<uint8_t>(m_Context->numOfBits >> 48);
+    m_Context->buffer[SHA256_BLOCK_LENGTH - 8] = static_cast<uint8_t>(m_Context->numOfBits >> 56);
+    
+    // Transform
+    Transform(m_Context->buffer);
     
     // Assemble hash
-    for(uint32_t i = 0; i < 8; i++) // Use uint32_t to avoid implicit sign conversion by left shift operator
+    std::vector<uint8_t> hash(32); // 256 bit hash
+    for(uint32_t i = 0; i < 8; i++)
     {
 #ifdef HM_LITTLE_ENDIAN
-        Utils::U32toU8<Utils::REVERSE_ENDIANNESS>(m_State[i], &hash[i << 2]); // Transform SHA big endian to host little endian
+        Utils::U32toU8<Utils::REVERSE_ENDIANNESS>(m_Context->state[i], &hash[i << 2]); // Transform SHA big endian to host little endian
 #else
-        Utils::U32toU8<Utils::KEEP_ENDIANNESS>(m_State[i], &hash[i << 2]);
+        Utils::U32toU8<Utils::KEEP_ENDIANNESS>(m_Context->state[i], &hash[i << 2]);
 #endif
     }
     
