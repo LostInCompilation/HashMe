@@ -313,6 +313,37 @@ void SHA384_Software(picobench::state& s)
 PICOBENCH(SHA384_Software);
 
 // ***************************************************
+// SHA384 hardware implementation
+std::string SHA384_Hardware_Hash = "";
+Averager<double> SHA384_HardwareAverager;
+void SHA384_Hardware(picobench::state& s)
+{
+    std::vector<uint8_t> hashResult;
+    Hasher<SHA384, HARDWARE> hasher;
+    
+    for(int32_t iterations = 0; iterations < s.iterations(); iterations++)
+    {
+        s.start_timer();
+        
+        hasher.Reset();
+        
+#ifdef TEST_BIG_DATA
+        hasher.Update(*bigData);
+#else
+        hasher.Update(testString);
+        //hasher.Update(longTestString);
+#endif
+        hashResult = hasher.End();
+        
+        s.stop_timer();
+    }
+    
+    SHA384_Hardware_Hash = Utils::HashToHexString(hashResult);
+    SHA384_HardwareAverager.AddDatapoint(static_cast<double>(bigDataSize / 1024.0 / 1024.0) / (s.duration_ns() / 1000.0 / 1000.0 / 1000.0));
+}
+PICOBENCH(SHA384_Hardware);
+
+// ***************************************************
 // MD5 software implementation
 std::string MD5_Software_Hash = "";
 Averager<double> MD5_SoftwareAverager;
@@ -599,9 +630,9 @@ void PrintSpeedAndHash()
     std::cout << "SHA384 (Software): " << std::fixed << std::setprecision(2) << SHA384_SoftwareAverager.GetAverage() << " MB/s" << std::endl;
     std::cout << "SHA384 (Software): " << SHA384_Software_Hash << std::endl << std::endl;
     
-//    std::cout << "***********************************************************" << std::endl;
-//    std::cout << "SHA384 (Hardware): " << std::fixed << std::setprecision(2) << SHA384_HardwareAverager.GetAverage() << " MB/s" << std::endl;
-//    std::cout << "SHA384 (Hardware): " << SHA384_Hardware_Hash << std::endl << std::endl;
+    std::cout << "***********************************************************" << std::endl;
+    std::cout << "SHA384 (Hardware): " << std::fixed << std::setprecision(2) << SHA384_HardwareAverager.GetAverage() << " MB/s" << std::endl;
+    std::cout << "SHA384 (Hardware): " << SHA384_Hardware_Hash << std::endl << std::endl;
     
     // ***************************************************
     // MD5
@@ -654,7 +685,7 @@ void PrintSpeedAndHash()
     assert(testStringHashSHA512_expected == SHA512_Hardware_Hash);
     
     assert(testStringHashSHA384_expected == SHA384_Software_Hash);
-    //assert(testStringHashSHA384_expected == SHA384_Hardware_Hash);
+    assert(testStringHashSHA384_expected == SHA384_Hardware_Hash);
     
     // MD5
     assert(testStringHashMD5_expected == MD5_Software_Hash);
@@ -725,12 +756,13 @@ int main()
 //    hasher.Update("123");
 //    hasher.Update("456");
 //    std::cout << "SHA512 Software: " << Utils::HashToHexString(hasher.End()) << std::endl;
-//    
-//    Hasher<SHA512, HARDWARE> hasherhw;
+    
+    
+//    Hasher<SHA384, HARDWARE> hasherhw;
 //    hasherhw.Update("123");
 //    hasherhw.Update("456");
-//    std::cout << "SHA512 Hardware: " << Utils::HashToHexString(hasherhw.End()) << std::endl;
-    
+//    std::cout << "SHA384 Hardware: " << Utils::HashToHexString(hasherhw.End()) << std::endl;
+//    
     
     // ***************************************************
     // Print startup header

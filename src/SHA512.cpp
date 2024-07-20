@@ -167,9 +167,9 @@ void Hasher<SHA512, SOFTWARE>::Update(const uint8_t* const data, const uint64_t 
         if(m_Context->bufferSize > 0)
         {
             // Buffer is already partially filled and untransformed
-            const uint32_t remainingBufferSpace = SHA512_BLOCK_LENGTH - m_Context->bufferSize;
-            const uint32_t bytesToCopy = (remainingBytes > remainingBufferSpace) ? remainingBufferSpace : static_cast<uint32_t>(remainingBytes);
-            
+            const uint64_t remainingBufferSpace = SHA512_BLOCK_LENGTH - m_Context->bufferSize;
+            const uint64_t bytesToCopy = std::min(remainingBytes, remainingBufferSpace);
+
             // Copy
             std::copy(data + dataIndex, data + dataIndex + bytesToCopy, m_Context->buffer + m_Context->bufferSize);
             m_Context->bufferSize += bytesToCopy;

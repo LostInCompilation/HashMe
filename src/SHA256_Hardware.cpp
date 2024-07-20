@@ -44,23 +44,20 @@ Hasher<SHA256, HARDWARE>::Hasher(const Hasher& other) : Hasher<SHA256, SOFTWARE>
 #if defined(HM_SIMD_ARM)
 void Hasher<SHA256, HARDWARE>::TransformARM(const uint8_t* const data)
 {
-    uint32x4_t STATE0, STATE1, ABCD_SAVE, EFGH_SAVE;
-    uint32x4_t MSG0, MSG1, MSG2, MSG3;
-    uint32x4_t TMP0, TMP1, TMP2;
-    
     // Load initial state
-    STATE0 = vld1q_u32(&m_Context->state[0]);
-    STATE1 = vld1q_u32(&m_Context->state[4]);
+    uint32x4_t STATE0 = vld1q_u32(&m_Context->state[0]);
+    uint32x4_t STATE1 = vld1q_u32(&m_Context->state[4]);
     
     // Save current state
-    ABCD_SAVE = STATE0;
-    EFGH_SAVE = STATE1;
+    const uint32x4_t ABCD_SAVE = STATE0;
+    const uint32x4_t EFGH_SAVE = STATE1;
 
     // Load data
-    MSG0 = vld1q_u32(reinterpret_cast<const uint32_t*>(data +  0));
-    MSG1 = vld1q_u32(reinterpret_cast<const uint32_t*>(data + 16));
-    MSG2 = vld1q_u32(reinterpret_cast<const uint32_t*>(data + 32));
-    MSG3 = vld1q_u32(reinterpret_cast<const uint32_t*>(data + 48));
+    const uint32_t* const data32 = reinterpret_cast<const uint32_t*>(data);
+    uint32x4_t MSG0 = vld1q_u32(data32 +  0);
+    uint32x4_t MSG1 = vld1q_u32(data32 + 16);
+    uint32x4_t MSG2 = vld1q_u32(data32 + 32);
+    uint32x4_t MSG3 = vld1q_u32(data32 + 48);
 
 #ifdef HM_LITTLE_ENDIAN // Reverse byte order if host is little endian to match SHA256 big endian requirement
     MSG0 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG0)));
@@ -68,6 +65,8 @@ void Hasher<SHA256, HARDWARE>::TransformARM(const uint8_t* const data)
     MSG2 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG2)));
     MSG3 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(MSG3)));
 #endif
+    
+    uint32x4_t TMP0, TMP1, TMP2;
     
     TMP0 = vaddq_u32(MSG0, vld1q_u32(&K[0x00]));
 
@@ -424,8 +423,8 @@ void Hasher<SHA256, HARDWARE>::Update(const uint8_t* const data, const uint64_t 
         if(m_Context->bufferSize > 0)
         {
             // Buffer is already partially filled and untransformed
-            const uint32_t remainingBufferSpace = SHA256_BLOCK_LENGTH - m_Context->bufferSize;
-            const uint32_t bytesToCopy = (remainingBytes > remainingBufferSpace) ? remainingBufferSpace : static_cast<uint32_t>(remainingBytes);
+            const uint64_t remainingBufferSpace = SHA256_BLOCK_LENGTH - m_Context->bufferSize;
+            const uint64_t bytesToCopy = std::min(remainingBytes, remainingBufferSpace);
             
             // Copy
             std::copy(data + dataIndex, data + dataIndex + bytesToCopy, m_Context->buffer + m_Context->bufferSize);

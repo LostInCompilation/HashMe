@@ -70,7 +70,7 @@ the following restrictions:
 #include "SHA512.hpp"
 #include "SHA512_Hardware.hpp"
 #include "SHA384.hpp"
-//#include "SHA384_Hardware.hpp"
+#include "SHA384_Hardware.hpp"
 #include "MD5.hpp"
 #include "CRC_Software.hpp"
 #include "CRC32_Hardware.hpp"

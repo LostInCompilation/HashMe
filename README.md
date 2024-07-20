@@ -54,7 +54,7 @@ Algorithm | Supported | Hardware acceleration (SIMD) |
 | SHA1 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA224 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
 | SHA256 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
-| SHA384 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| SHA384 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA512 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA512/224 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA512/256 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
@@ -106,7 +106,7 @@ SHA256 Hardware (SIMD) | 1944.79 MB/s
 SHA384 Software | 317.07 MB/s
 SHA384 Hardware (SIMD) | xxx MB/s
 SHA512 Software | 317.10 MB/s
-SHA512 Hardware (SIMD) | xxx MB/s
+SHA512 Hardware (SIMD) | 1337.49 MB/s
 
 
 #### x86_64 (Intel)
