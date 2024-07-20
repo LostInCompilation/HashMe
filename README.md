@@ -36,26 +36,26 @@ TODO WRITE: STREAMING FOR LARGE FILES
 
 ### Supported hash algorithms
 #### CRC
-Algorithm | Supported | Hardware acceleration |
+Algorithm | Supported | Hardware acceleration (SIMD) |
 | -- | --------- | --------- |
 | CRC16 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | CRC32 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | CRC64 (ECMA) | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 
 #### MD
-Algorithm | Supported | Hardware acceleration |
+Algorithm | Supported | Hardware acceleration (SIMD) |
 | -- | --------- | --------- |
 | MD5 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | MD6 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 
 #### SHA
-Algorithm | Supported | Hardware acceleration |
+Algorithm | Supported | Hardware acceleration (SIMD) |
 | -- | --------- | --------- |
 | SHA1 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
-| SHA224 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| SHA224 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
 | SHA256 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;⚠️ x86 |
 | SHA384 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
-| SHA512 | ✅ Yes | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
+| SHA512 | ✅ Yes | ✅ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA512/224 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA512/256 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |
 | SHA3-512 | ❌ WIP | ❌ ARM&nbsp;&nbsp;\|&nbsp;&nbsp;❌ x86 |

@@ -68,7 +68,7 @@ the following restrictions:
 #include "SHA224.hpp"
 #include "SHA224_Hardware.hpp"
 #include "SHA512.hpp"
-//#include "SHA512_Hardware.hpp"
+#include "SHA512_Hardware.hpp"
 #include "SHA384.hpp"
 //#include "SHA384_Hardware.hpp"
 #include "MD5.hpp"

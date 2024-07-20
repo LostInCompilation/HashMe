@@ -27,12 +27,12 @@ the following restrictions:
 /*                      (C) 2024 Marc Schöndorf                     */
 /*                            See license                           */
 /*                                                                  */
-/*  SHA256_Hardware.hpp                                             */
-/*  Created: 27.06.2024                                             */
+/*  SHA512_Hardware.hpp                                             */
+/*  Created: 20.07.2024                                             */
 /*------------------------------------------------------------------*/
 
-#ifndef SHA256_Hardware_hpp
-#define SHA256_Hardware_hpp
+#ifndef SHA512_Hardware_hpp
+#define SHA512_Hardware_hpp
 
 #if defined(HM_SIMD_ARM) || defined(HM_SIMD_X86)
 
@@ -41,7 +41,7 @@ namespace HashMe
 
 // Dummy types for template
 struct HARDWARE;
-struct SHA256;
+struct SHA512;
 
 // ***************************************************
 // Forward declaration for hasher class
@@ -49,9 +49,9 @@ template <typename HashAlgorithm, typename HardwareSoftwareImplementation>
 class Hasher;
 
 // ***************************************************
-// Hasher class for SHA256 with SIMD support
+// Hasher class for SHA512 with SIMD support
 template <>
-class Hasher<SHA256, HARDWARE> : public Hasher<SHA256, SOFTWARE>
+class Hasher<SHA512, HARDWARE> : public Hasher<SHA512, SOFTWARE>
 {
 private:
 #if defined(HM_SIMD_ARM)
@@ -72,7 +72,7 @@ public:
     Hasher& operator=(const Hasher& other) = delete;
     const Hasher& operator=(const Hasher& other) const = delete;
     
-    // Methods    
+    // Methods
     virtual void Update(const uint8_t* const data, const uint64_t size) override;
     virtual void Update(const std::vector<uint8_t>& data) override;
     virtual void Update(const std::string& str) override;
@@ -84,4 +84,4 @@ public:
 
 #endif /* HM_SIMD_ARM || HM_SIMD_X86 */
 
-#endif /* SHA256_Hardware_hpp */
+#endif /* SHA512_Hardware_hpp */

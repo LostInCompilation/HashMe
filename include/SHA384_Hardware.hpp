@@ -27,12 +27,12 @@ the following restrictions:
 /*                      (C) 2024 Marc Schöndorf                     */
 /*                            See license                           */
 /*                                                                  */
-/*  SHA256_Hardware.hpp                                             */
-/*  Created: 27.06.2024                                             */
+/*  SHA384_Hardware.hpp                                             */
+/*  Created: 20.07.2024                                             */
 /*------------------------------------------------------------------*/
 
-#ifndef SHA256_Hardware_hpp
-#define SHA256_Hardware_hpp
+#ifndef SHA384_Hardware_hpp
+#define SHA384_Hardware_hpp
 
 #if defined(HM_SIMD_ARM) || defined(HM_SIMD_X86)
 
@@ -41,7 +41,7 @@ namespace HashMe
 
 // Dummy types for template
 struct HARDWARE;
-struct SHA256;
+struct SHA384;
 
 // ***************************************************
 // Forward declaration for hasher class
@@ -49,22 +49,25 @@ template <typename HashAlgorithm, typename HardwareSoftwareImplementation>
 class Hasher;
 
 // ***************************************************
-// Hasher class for SHA256 with SIMD support
+// Hasher class for SHA384 with SIMD support
 template <>
-class Hasher<SHA256, HARDWARE> : public Hasher<SHA256, SOFTWARE>
+class Hasher<SHA384, HARDWARE> : public Hasher<SHA512, HARDWARE>
 {
 private:
-#if defined(HM_SIMD_ARM)
-    void         TransformARM(const uint8_t* data);
-#elif defined(HM_SIMD_X86)
-    void         TransformX86(const uint8_t* data);
-#endif
+    // ***************************************************
+    // Constants
+    inline static constexpr std::array<uint64_t, 8> INITIAL_HASH_VALUES = {
+        0xcbbb9d5dc1059ed8, 0x629a292a367cd507,
+        0x9159015a3070dd17, 0x152fecd8f70e5939,
+        0x67332667ffc00b31, 0x8eb44a8768581511,
+        0xdb0c2e0d64f98fa7, 0x47b5481dbefa4fa4
+    };
     
-protected:
-    virtual void Transform(const uint8_t* const data) override;
+    // Methods
+    virtual void Initialize() override;
     
 public:
-    Hasher() = default;
+    Hasher();
     virtual ~Hasher() = default;
     
     // Allow copy but no assign
@@ -72,11 +75,8 @@ public:
     Hasher& operator=(const Hasher& other) = delete;
     const Hasher& operator=(const Hasher& other) const = delete;
     
-    // Methods    
-    virtual void Update(const uint8_t* const data, const uint64_t size) override;
-    virtual void Update(const std::vector<uint8_t>& data) override;
-    virtual void Update(const std::string& str) override;
-    
+    // Methods
+    virtual void Reset() override;
     [[nodiscard]] virtual std::vector<uint8_t> End() override;
 };
 
@@ -84,4 +84,4 @@ public:
 
 #endif /* HM_SIMD_ARM || HM_SIMD_X86 */
 
-#endif /* SHA256_Hardware_hpp */
+#endif /* SHA224_Hardware_hpp */

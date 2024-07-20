@@ -53,6 +53,7 @@ add_library("${PROJECT_NAME}"
 	include/SHA224.hpp
 	include/SHA224_Hardware.hpp
 	include/SHA512.hpp
+	include/SHA512_Hardware.hpp
 	include/SHA384.hpp
 	include/MD5.hpp
 	include/CRC_Software.hpp
@@ -65,6 +66,7 @@ add_library("${PROJECT_NAME}"
 	src/SHA224.cpp
 	src/SHA224_Hardware.cpp
 	src/SHA512.cpp
+	src/SHA512_Hardware.cpp
 	src/SHA384.cpp
 	src/MD5.cpp
 	src/CRC_Software.cpp

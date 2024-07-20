@@ -94,7 +94,7 @@ protected:
     std::unique_ptr<Context> m_Context;
     
     // Methods
-    void Transform(const uint8_t* const data);
+    virtual void Transform(const uint8_t* const data);
     
 public:
     Hasher();
