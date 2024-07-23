@@ -98,7 +98,7 @@ endif()
 
 #############################################################
 # SIMD specific compiler settings
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # GCC
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang") # GCC
 	if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64") # Do we compile for arm64?
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-march=armv8-a+crypto+crc")
 		#target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
