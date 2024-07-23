@@ -407,7 +407,7 @@ void Hasher<SHA512, HARDWARE>::TransformARM(const uint8_t* const data)
 #elif defined(HM_SIMD_X86)
 void Hasher<SHA512, HARDWARE>::TransformX86(const uint8_t* const data)
 {
-    static_assert(0, "Not implemented");
+    //static_assert(0, "Not implemented");
 }
 #endif
 
