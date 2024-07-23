@@ -62,7 +62,7 @@ jobs:
           cmake -B ${{ steps.strings.outputs.build-output-dir }}
           -DCMAKE_SYSTEM_PROCESSOR="arm64"
           -DCMAKE_OSX_ARCHITECTURES="arm64"
-          -DCMAKE_CXX_FLAGS="--arch=arm64"
+          -DCMAKE_CXX_FLAGS="-march=arm64"
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DCMAKE_COLOR_DIAGNOSTICS=ON

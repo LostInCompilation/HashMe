@@ -38,7 +38,6 @@ using namespace HashMe;
 // ***************************************************
 // Helper function to convert the hash to a string of hex values with fixed size (two digits)
 #ifdef HM_COMPILER_HAS_FMT_CAPABILITY
-#error "FMT Support!"
 std::string Utils::HashToHexString(const std::vector<uint8_t>& hash)
 {
     std::string result = "";
