@@ -56,8 +56,9 @@ the following restrictions:
 //    #endif
 //#endif
 
-#if __cpp_lib_format
+#ifdef __cpp_lib_format
 #define HM_COMPILER_HAS_FMT_CAPABILITY
+#error "FMT is on"
 #endif
 
 // ***************************************************

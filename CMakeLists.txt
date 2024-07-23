@@ -13,7 +13,7 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW) # Needed to set options of subprojects ins
 
 ###########################################################
 # Use C++20
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_CXX_EXTENSIONS false) # Don't use GNU++
 
@@ -101,12 +101,12 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang") # GCC
 	if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64") # Do we compile for arm64?
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-march=armv8-a+crypto+crc")
-		#target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
+		target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
 	elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "Win32")
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-march=native")
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-msse4.1")
 		target_compile_options("${PROJECT_NAME}" PRIVATE "-msha")
-		#target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
+		target_compile_options("${PROJECT_NAME}" PRIVATE "-ftree-vectorize")
 	endif()
 endif()
 
