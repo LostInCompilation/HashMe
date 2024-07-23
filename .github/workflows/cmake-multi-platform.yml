@@ -26,6 +26,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         build_type: [Debug, Release]
         cpp_compiler: [g++, clang++, cl]
+        c_compiler: [g++, clang++, cl]
         include:
           - os: windows-latest
             cpp_compiler: cl
@@ -35,6 +36,15 @@ jobs:
             cpp_compiler: clang++
           - os: macos-latest
             cpp_compiler: clang++
+        exclude:
+          - os: windows-latest
+            c_compiler: gcc
+          - os: windows-latest
+            c_compiler: clang
+          - os: ubuntu-latest
+            c_compiler: cl
+          - os: macos-latest
+            c_compiler: cl
 
     steps:
     - uses: actions/checkout@v4
