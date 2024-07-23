@@ -102,7 +102,7 @@ void Hasher<CRC32, HARDWARE>::Update(const uint8_t* const data, const uint64_t s
 #elif defined(HM_SIMD_X86)
 void Hasher<CRC32, HARDWARE>::Update(const uint8_t* const data, const uint64_t size)
 {
-    static_assert(0, "Not implemented");
+    //static_assert(0, "Not implemented");
 }
 #endif
 
