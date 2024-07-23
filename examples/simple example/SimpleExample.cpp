@@ -705,6 +705,9 @@ void PrintSpeedAndHash()
 // Print measured speed and computed hashes
 void PrintPredefInfo()
 {
+    std::cout << "Clang Version: " << HASH_PREDEF_VERSION_NUMBER_MAJOR(HASH_PREDEF_COMP_CLANG) << "." << HASH_PREDEF_VERSION_NUMBER_MINOR(HASH_PREDEF_COMP_CLANG) << std::endl;
+
+    
     // ***************************************************
     // Architecture
 #ifdef HASH_PREDEF_ARCH_ARM_AVAILABLE

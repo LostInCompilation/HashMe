@@ -42,18 +42,22 @@ the following restrictions:
 
 // ***************************************************
 // Compiler version to detect <format> capability
-#if defined(HASH_PREDEF_COMP_GNUC_AVAILABLE) && !defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) // GCC
-    #if (HASH_PREDEF_COMP_GNUC >= HASH_PREDEF_VERSION_NUMBER(13, 1, 0)) // GCC version >= 13.1
-        #define HM_COMPILER_HAS_FMT_CAPABILITY
-    #endif
-#elif defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) && defined(HASH_PREDEF_OS_MACOS) // Apple clang
-    #if (HASH_PREDEF_COMP_CLANG >= HASH_PREDEF_VERSION_NUMBER(15, 0, 0)) // Apple clang version >= 15.0
-        #define HM_COMPILER_HAS_FMT_CAPABILITY
-    #endif
-#elif defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) && !defined(HASH_PREDEF_OS_MACOS) // Clang
-    #if (HASH_PREDEF_COMP_CLANG >= HASH_PREDEF_VERSION_NUMBER(17, 0, 0)) // Clang version >= 17.0
-        #define HM_COMPILER_HAS_FMT_CAPABILITY
-    #endif
+//#if defined(HASH_PREDEF_COMP_GNUC_AVAILABLE) && !defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) // GCC
+//    #if (HASH_PREDEF_COMP_GNUC >= HASH_PREDEF_VERSION_NUMBER(13, 1, 0)) // GCC version >= 13.1
+//        #define HM_COMPILER_HAS_FMT_CAPABILITY
+//    #endif
+//#elif defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) && defined(HASH_PREDEF_OS_MACOS) // Apple clang
+//    #if (HASH_PREDEF_COMP_CLANG >= HASH_PREDEF_VERSION_NUMBER(15, 0, 0)) // Apple clang version >= 15.0
+//        #define HM_COMPILER_HAS_FMT_CAPABILITY
+//    #endif
+//#elif defined(HASH_PREDEF_COMP_CLANG_AVAILABLE) && !defined(HASH_PREDEF_OS_MACOS) // Clang
+//    #if (HASH_PREDEF_COMP_CLANG >= HASH_PREDEF_VERSION_NUMBER(17, 0, 0)) // Clang version >= 17.0
+//        #define HM_COMPILER_HAS_FMT_CAPABILITY
+//    #endif
+//#endif
+
+#if __cpp_lib_format
+#define HM_COMPILER_HAS_FMT_CAPABILITY
 #endif
 
 // ***************************************************
